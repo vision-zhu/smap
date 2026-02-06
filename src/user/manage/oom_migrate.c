@@ -185,15 +185,15 @@ static int InitOomMigrateMsg(struct MigrateMsg *mMsg, struct ProcessManager *man
 static void FindEnoughPageToMigrate(uint64_t *pageCount, ProcessAttr *attr, struct MigrateMsg *mMsg)
 {
     int ret, pagemapFd;
-    struct MigList mList;
+    struct MigList mList = { 0 };
 
     ret = InitMigList(&mList, pageCount, attr);
-    if (mList.nr == 0) {
-        SMAP_LOGGER_INFO("mList.nr == 0, don't need to migrate.");
-        return;
-    }
     if (ret) {
         SMAP_LOGGER_ERROR("InitMigList failed, pid %d  ret:%d.", attr->pid, ret);
+        return;
+    }
+    if (mList.nr == 0) {
+        SMAP_LOGGER_INFO("mList.nr == 0, don't need to migrate.");
         return;
     }
     uint64_t migPages = mList.nr;

@@ -947,7 +947,7 @@ pid_t *QueryManagedProcess(PidType type)
     }
     int nrManaged = 0;
     while (current) {
-        if (current->type = type) {
+        if (current->type == type) {
             managedPid[nrManaged++] = current->pid;
         }
         current = current->next;
@@ -1161,6 +1161,7 @@ static int ParseBitmapData(struct ProcessMemBitmap *pmb, char *buf, size_t *offs
         ret = memcpy_s(pmb->data[nid], bitmapSize * pmb->len[nid], buf + tmpOffset, bitmapSize * pmb->len[nid]);
         if (ret) {
             FreePmbData(pmb);
+            FreeWhiteListBm(pmb);
             return -ret;
         }
         tmpOffset += bitmapSize * pmb->len[nid];
