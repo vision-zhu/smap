@@ -1,0 +1,12 @@
+[submodule "3rdparty/secure/libboundscheck"]
+	path = 3rdparty/secure/libboundscheck
+	url = https://atomgit.com/openeuler/libboundscheck.git
+[submodule "3rdparty/spdlog"]
+	path = 3rdparty/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "test/3rdparty/googletest"]
+	path = test/3rdparty/googletest
+	url = https://gitee.com/mirrors/googletest.git
+[submodule "test/3rdparty/mockcpp"]
+	path = test/3rdparty/mockcpp
+	url = https://gitee.com/mirrors_sinojelly/mockcpp.git
