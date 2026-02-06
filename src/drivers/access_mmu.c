@@ -18,23 +18,13 @@
 #include "access_tracking_wrapper.h"
 #include "access_mmu.h"
 
-#define PAGEMAP_WALK_SIZE (PMD_SIZE)
-#define PAGEMAP_WALK_MASK (PMD_MASK)
-
-#define PM_ENTRY_BYTES sizeof(pagemap_entry_t)
 #define PM_PFRAME_BITS 55
 #define PM_PFRAME_MASK GENMASK_ULL(PM_PFRAME_BITS - 1, 0)
 #define PM_SOFT_DIRTY BIT_ULL(55)
-#define PM_MMAP_EXCLUSIVE BIT_ULL(56)
-#define PM_UFFD_WP BIT_ULL(57)
-#define PM_FILE BIT_ULL(61)
-#define PM_SWAP BIT_ULL(62)
 #define PM_PRESENT BIT_ULL(63)
 
 #define PM_END_OF_BUFFER 1
 
-#define FILE_NAME_MAX 32
-#define RAM_SLOT_ID 2
 #ifdef CONFIG_MEM_SOFT_DIRTY
 #define VM_SOFTDIRTY 0x08000000 /* Not soft dirty clean area */
 #else
@@ -42,7 +32,6 @@
 #endif
 
 #define PM_LEN 16384
-#define PROC_READ_PM_LEN 128
 
 #define MAPPING_U32_BITS (32)
 
@@ -406,13 +395,6 @@ static void pos_to_addr(struct mm_struct *mm, unsigned long pos,
 		count += nr_pages;
 	}
 	*vaddr = last_vaddr;
-}
-
-static inline u32 to_hugepage_count(u32 nr)
-{
-	u32 shift = TWO_MEGA_SHIFT - PAGE_SHIFT;
-	u32 mask = (1UL << shift) - 1;
-	return (nr & mask) == 0 ? nr >> shift : (nr >> shift) + 1;
 }
 
 struct mm_struct *get_mm_by_pid(pid_t pid)

@@ -27,7 +27,6 @@
 #include "ub_hist.h"
 #include "hist_ops.h"
 
-#define MAX_READ_TRY (2)
 #define HOT_WINDOW_RATIO (10)
 static struct smap_hist_dev g_smap_hist_dev;
 
@@ -42,14 +41,6 @@ static inline u64 align_addr(u64 addr, u32 low_bit_len)
 static inline bool addr_is_aligned(u64 addr, u32 low_bit_len)
 {
 	return !(addr & ((1ULL << low_bit_len) - 1));
-}
-
-static inline u64 align_addr_by_sts_size(u64 addr, u8 sts_size)
-{
-	if (sts_size == STS_SIZE_4K) {
-		return align_addr(addr, HIST_ADDR_SHIFT_32M);
-	}
-	return align_addr(addr, HIST_ADDR_SHIFT_16G);
 }
 
 static bool addr_seg_is_valid(struct segs_info *info)

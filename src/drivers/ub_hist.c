@@ -22,10 +22,7 @@
 
 #include "ub_hist.h"
 
-#define PLATFORM_MAX_CPU_NUM 2
 #define UDIE_MAX_BA_NUM 4
-#define UDIE_MAX_CACHE_TYPE 2
-#define UDIE_PHY_ADDR_RANGE_SIZE (1024 * GB)
 
 #define UDIE_PHY_ADDR_STS_REGS_OFFSET 0x4000
 #define BA_CTRL_REG_INIT 0x000001C1

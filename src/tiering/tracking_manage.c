@@ -29,8 +29,6 @@
 #include "pid_ioctl.h"
 #include "tracking_manage.h"
 
-#define SMAP_WATCH_NAME "smap_migrate_result"
-
 #undef pr_fmt
 #define pr_fmt(fmt) "SMAP_track_manage: " fmt
 
