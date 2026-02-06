@@ -13,6 +13,10 @@
 #include <linux/cpumask.h>
 #include <linux/page-isolation.h>
 #include <linux/limits.h>
+#include <linux/hashtable.h>
+#include <linux/spinlock.h>
+#include <linux/module.h>
+#include <linux/mutex.h>
 
 #include "numa.h"
 #include "rmap.h"
@@ -46,6 +50,160 @@
 #undef pr_fmt
 #define pr_fmt(fmt) "SMAP_migrate: " fmt
 
+/*
+ * Optional integration with smap_access_tracking: record pages migrated to
+ * remote NUMA in the last migration cycle and export them via white_list_bm.
+ *
+ * We resolve the access-side symbols dynamically to avoid hard module
+ * dependency / load order requirements.
+ */
+extern int smap_access_whitelist_cycle_begin(pid_t pid);
+extern int smap_access_whitelist_update(pid_t pid, u64 paddr, bool set);
+
+static typeof(&smap_access_whitelist_cycle_begin) smap_wl_begin_fn;
+static typeof(&smap_access_whitelist_update) smap_wl_update_fn;
+static DEFINE_MUTEX(smap_wl_sym_lock);
+static bool smap_wl_resolve_tried;
+
+static void smap_wl_resolve_symbols(void)
+{
+	mutex_lock(&smap_wl_sym_lock);
+	if (smap_wl_resolve_tried) {
+		mutex_unlock(&smap_wl_sym_lock);
+		return;
+	}
+	smap_wl_resolve_tried = true;
+	if (!smap_wl_begin_fn) {
+		smap_wl_begin_fn = symbol_get(smap_access_whitelist_cycle_begin);
+	}
+	if (!smap_wl_update_fn) {
+		smap_wl_update_fn = symbol_get(smap_access_whitelist_update);
+	}
+	/*
+	 * If access module isn't loaded yet, symbol_get() returns NULL. Allow
+	 * retry later so load order doesn't permanently disable the feature.
+	 */
+	if (!smap_wl_begin_fn && !smap_wl_update_fn) {
+		smap_wl_resolve_tried = false;
+	}
+	mutex_unlock(&smap_wl_sym_lock);
+}
+
+static void smap_whitelist_cycle_begin(pid_t pid)
+{
+	if (!smap_wl_begin_fn) {
+		smap_wl_resolve_symbols();
+	}
+	if (smap_wl_begin_fn) {
+		(void)smap_wl_begin_fn(pid);
+	}
+}
+
+static void smap_whitelist_update(pid_t pid, u64 paddr, bool set)
+{
+	if (!smap_wl_update_fn) {
+		smap_wl_resolve_symbols();
+	}
+	if (smap_wl_update_fn) {
+		(void)smap_wl_update_fn(pid, paddr, set);
+	}
+}
+
+void smap_whitelist_put_symbols(void)
+{
+	mutex_lock(&smap_wl_sym_lock);
+	if (smap_wl_begin_fn) {
+		symbol_put(smap_access_whitelist_cycle_begin);
+		smap_wl_begin_fn = NULL;
+	}
+	if (smap_wl_update_fn) {
+		symbol_put(smap_access_whitelist_update);
+		smap_wl_update_fn = NULL;
+	}
+	smap_wl_resolve_tried = false;
+	mutex_unlock(&smap_wl_sym_lock);
+}
+
+/*
+ * Migration callbacks do not provide pid. Keep a per-task pid context so
+ * callbacks can attribute migrated pages to the correct process.
+ */
+struct smap_mig_pid_ctx {
+	struct hlist_node node;
+	struct task_struct *task;
+	pid_t pid;
+};
+
+#define SMAP_MIG_PID_HASH_BITS 6
+static DEFINE_HASHTABLE(smap_mig_pid_ht, SMAP_MIG_PID_HASH_BITS);
+static DEFINE_SPINLOCK(smap_mig_pid_lock);
+
+static void smap_mig_pid_ctx_clear_current(void)
+{
+	struct smap_mig_pid_ctx *ctx;
+
+	spin_lock(&smap_mig_pid_lock);
+	hash_for_each_possible(smap_mig_pid_ht, ctx, node,
+			       (unsigned long)current) {
+		if (ctx->task == current) {
+			hash_del(&ctx->node);
+			spin_unlock(&smap_mig_pid_lock);
+			kfree(ctx);
+			return;
+		}
+	}
+	spin_unlock(&smap_mig_pid_lock);
+}
+
+static void smap_mig_pid_ctx_set_current(pid_t pid)
+{
+	struct smap_mig_pid_ctx *ctx;
+
+	smap_mig_pid_ctx_clear_current();
+	ctx = kmalloc(sizeof(*ctx), GFP_KERNEL);
+	if (!ctx) {
+		return;
+	}
+	ctx->task = current;
+	ctx->pid = pid;
+	spin_lock(&smap_mig_pid_lock);
+	hash_add(smap_mig_pid_ht, &ctx->node, (unsigned long)current);
+	spin_unlock(&smap_mig_pid_lock);
+}
+
+static pid_t smap_mig_pid_ctx_get_current(void)
+{
+	struct smap_mig_pid_ctx *ctx;
+	pid_t pid = -1;
+
+	spin_lock(&smap_mig_pid_lock);
+	hash_for_each_possible(smap_mig_pid_ht, ctx, node,
+			       (unsigned long)current) {
+		if (ctx->task == current) {
+			pid = ctx->pid;
+			break;
+		}
+	}
+	spin_unlock(&smap_mig_pid_lock);
+	return pid;
+}
+
+void smap_mig_pid_ctx_cleanup_all(void)
+{
+	struct smap_mig_pid_ctx *ctx;
+	struct hlist_node *tmp;
+	int bkt;
+
+	spin_lock(&smap_mig_pid_lock);
+	hash_for_each_safe(smap_mig_pid_ht, bkt, tmp, ctx, node) {
+		hash_del(&ctx->node);
+		kfree(ctx);
+	}
+	spin_unlock(&smap_mig_pid_lock);
+}
+
+static void smap_put_new_node_page(struct folio *folio, unsigned long node);
+
 struct num_list {
 	struct hlist_head hlist_head;
 };
@@ -64,6 +222,7 @@ struct multi_migrate_struct {
 	unsigned int nr_folios;
 	unsigned int failed_num;
 	int to_node;
+	pid_t pid;
 	struct completion comp;
 	char thread_name[20];
 	bool init_flag;
@@ -147,10 +306,14 @@ static int thread_fn(void *data)
 	ms->start_time = ktime_get();
 	ms->end_time = 0;
 	ktime_t mig_time;
+
+	smap_mig_pid_ctx_set_current(ms->pid);
 	ret = isolate_and_migrate_folios(ms->folios, ms->nr_folios,
-					 smap_alloc_new_node_page, NULL,
+					 smap_alloc_new_node_page,
+					 smap_put_new_node_page,
 					 ms->to_node, MIGRATE_ASYNC,
 					 &nr_succeeded);
+	smap_mig_pid_ctx_clear_current();
 	if (ret) {
 		pr_err("failed to migrate pages, ret: %d\n", ret);
 	}
@@ -188,7 +351,7 @@ static void cal_thread_time(ktime_t *start_time, ktime_t *end_time,
 }
 
 static int init_mig(unsigned int nr_threads, unsigned int nr_folios,
-		    int to_node)
+		    int to_node, pid_t pid)
 {
 	unsigned int i;
 	unsigned int avg_cnt;
@@ -205,6 +368,7 @@ static int init_mig(unsigned int nr_threads, unsigned int nr_folios,
 		init_completion(&mig[i].comp);
 		mig[i].init_flag = true;
 		mig[i].to_node = to_node;
+		mig[i].pid = pid;
 		if (sprintf(mig[i].thread_name, "%s%u", THREAD_PREFIX, i) < 0)
 			pr_debug("sprintf failed: thread smap_migrate_%u ", i);
 	}
@@ -220,7 +384,7 @@ static void put_folios(struct folio **folios, unsigned int nr_folios)
 }
 
 int migrate_multi_threaded(unsigned int nr_threads, struct folio **folios,
-			   unsigned int nr_folios, int to_node)
+			   unsigned int nr_folios, int to_node, pid_t pid)
 {
 	unsigned int i;
 	int ret;
@@ -232,7 +396,7 @@ int migrate_multi_threaded(unsigned int nr_threads, struct folio **folios,
 		return -EINVAL;
 	}
 
-	ret = init_mig(nr_threads, nr_folios, to_node);
+	ret = init_mig(nr_threads, nr_folios, to_node, pid);
 	if (ret) {
 		put_folios(folios, nr_folios);
 		return ret;
@@ -291,13 +455,15 @@ unsigned int smap_migrate(struct folio **folios, unsigned int nr_folios,
 	if (is_mig_back) {
 		err = isolate_and_migrate_folios(
 			folios, nr_folios, smap_alloc_new_node_page_mig_back,
-			NULL, to_node, MIGRATE_ASYNC, &nr_succeeded);
+			smap_put_new_node_page, to_node, MIGRATE_ASYNC,
+			&nr_succeeded);
 		if (err) {
 			pr_err("failed to migrate back, ret: %d\n", err);
 		}
 	} else {
 		err = isolate_and_migrate_folios(folios, nr_folios,
-						 smap_alloc_new_node_page, NULL,
+						 smap_alloc_new_node_page,
+						 smap_put_new_node_page,
 						 to_node, MIGRATE_ASYNC,
 						 &nr_succeeded);
 		if (err) {
@@ -652,8 +818,40 @@ void smap_handle_migrate_back_subtask_4k(struct migrate_back_subtask *task)
 			       MB_SUBTASK_DONE;
 }
 
+static void prepare_last_cycle_remote_whitelist(struct migrate_msg *msg,
+					       struct mig_list *mig_list)
+{
+	int i, j;
+
+	if (!msg || !mig_list || msg->cnt <= 0) {
+		return;
+	}
+
+	for (i = 0; i < msg->cnt; i++) {
+		pid_t pid = mig_list[i].pid;
+
+		if (pid <= 0) {
+			continue;
+		}
+		if (!is_numa_remote(mig_list[i].to)) {
+			continue;
+		}
+		/* Deduplicate pid within this migrate message. */
+		for (j = 0; j < i; j++) {
+			if (mig_list[j].pid == pid &&
+			    is_numa_remote(mig_list[j].to)) {
+				pid = -1;
+				break;
+			}
+		}
+		if (pid > 0) {
+			smap_whitelist_cycle_begin(pid);
+		}
+	}
+}
+
 static unsigned int smu_migrate(struct folio **folios, unsigned int nr_folios,
-				int to_node, struct mig_pra *mul_mig)
+				int to_node, struct mig_pra *mul_mig, pid_t pid)
 {
 	int ret;
 	unsigned int i;
@@ -662,7 +860,7 @@ static unsigned int smu_migrate(struct folio **folios, unsigned int nr_folios,
 	if (mul_mig && mul_mig->is_mul_thread && mul_mig->nr_thread > 0) {
 		nr_threads = mul_mig->nr_thread;
 		ret = migrate_multi_threaded(nr_threads, folios, nr_folios,
-					     to_node);
+					     to_node, pid);
 		if (ret) {
 			pr_err("failed to migrate with multi threads, ret:%d\n",
 			       ret);
@@ -675,7 +873,9 @@ static unsigned int smu_migrate(struct folio **folios, unsigned int nr_folios,
 			failed_num += mig[i].failed_num;
 		}
 	} else {
+		smap_mig_pid_ctx_set_current(pid);
 		failed_num = smap_migrate(folios, nr_folios, to_node, false);
+		smap_mig_pid_ctx_clear_current();
 	}
 	return failed_num;
 }
@@ -728,6 +928,7 @@ int do_migrate(struct migrate_msg *msg, struct mig_list *mig_list)
 	if (msg->cnt == 0) {
 		return 0;
 	}
+	prepare_last_cycle_remote_whitelist(msg, mig_list);
 	arr = kzalloc(msg->cnt * sizeof(*arr), GFP_KERNEL);
 	if (!arr)
 		return -ENOMEM;
@@ -818,7 +1019,7 @@ int do_migrate(struct migrate_msg *msg, struct mig_list *mig_list)
 		}
 		mig_list[i].failed_mig_nr =
 			smu_migrate(migrate_folios, nr_folios, mig_list[i].to,
-				    &msg->mul_mig);
+				    &msg->mul_mig, mig_list[i].pid);
 		failed_num += mig_list[i].failed_mig_nr;
 		mig_list[i].success_to_user = true;
 		if (mig_list[i].failed_mig_nr) {
@@ -1017,10 +1218,46 @@ struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid,
 
 struct folio *smap_alloc_new_node_page(struct folio *folio, unsigned long node)
 {
+	struct folio *new_folio;
+
 	if (folio_test_hugetlb(folio)) {
-		return smap_alloc_huge_page_node(folio, node, false);
+		new_folio = smap_alloc_huge_page_node(folio, node, false);
+	} else {
+		new_folio = alloc_demote_page(folio, node);
 	}
-	return alloc_demote_page(folio, node);
+
+	/*
+	 * Record only migrations to remote NUMA. We record the physical address
+	 * of the newly allocated destination folio. If migration fails,
+	 * smap_put_new_node_page() will clear the corresponding bit.
+	 */
+	if (new_folio && is_numa_remote((int)node)) {
+		pid_t pid = smap_mig_pid_ctx_get_current();
+		u64 paddr = PFN_PHYS(folio_pfn(new_folio));
+		if (pid > 0) {
+			smap_whitelist_update(pid, paddr, true);
+		}
+	}
+	return new_folio;
+}
+
+static void smap_put_new_node_page(struct folio *folio, unsigned long node)
+{
+	pid_t pid;
+	u64 paddr;
+
+	if (!folio) {
+		return;
+	}
+	if (!is_numa_remote((int)node)) {
+		return;
+	}
+	pid = smap_mig_pid_ctx_get_current();
+	if (pid <= 0) {
+		return;
+	}
+	paddr = PFN_PHYS(folio_pfn(folio));
+	smap_whitelist_update(pid, paddr, false);
 }
 
 struct folio *smap_alloc_new_node_page_mig_back(struct folio *folio,

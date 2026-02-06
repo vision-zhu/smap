@@ -39,7 +39,6 @@
 #define DECIMAL 10
 #define DEFAULT_REF_COUNT 0
 #define TRUE_REF 1
-#define MAX_NR_KVM 100
 #undef pr_fmt
 #define pr_fmt(fmt) "access-bit: " fmt
 #define MMAPLOCK_BATCH_SIZE (64UL * 1024 * 1024)
@@ -54,14 +53,6 @@ struct smap_vma_struct {
 	unsigned long start_vaddr;
 	unsigned long end_vaddr;
 };
-
-void free_mem(struct acpi_mem_segment *mem)
-{
-	if (!mem) {
-		return;
-	}
-	kfree(mem);
-}
 
 /* Must be called with an elevated refcount on the filp */
 static inline bool is_kvm_file(struct file *filp)

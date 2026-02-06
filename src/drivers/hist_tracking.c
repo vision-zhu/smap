@@ -32,11 +32,6 @@
 
 #define to_access_tracking_dev(n) container_of(n, struct access_tracking_dev, ldev)
 #define to_delay_work(n) container_of(n, struct delayed_work, work)
-#define delay_work_to_dev(n) \
-	container_of(n, struct access_tracking_dev, scan_work)
-#define WORK_QUEUE_NAME_LEN 32
-#define HIST_TRACKING_DEFAULT_PERIOD 200
-#define SCAN_TIME_MAX 100000
 
 #undef pr_fmt
 #define pr_fmt(fmt) "hist: " fmt

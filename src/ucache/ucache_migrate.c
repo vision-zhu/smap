@@ -209,3 +209,13 @@ struct migrate_success *get_migrate_success(int nid)
 {
 	return idr_find(&nid_success_idr, nid);
 }
+
+void ucache_migrate_deinit(void)
+{
+	struct migrate_success *success_rate;
+	unsigned long id;
+
+	idr_for_each_entry(&nid_success_idr, success_rate, id)
+		kfree(success_rate);
+	idr_destroy(&nid_success_idr);
+}

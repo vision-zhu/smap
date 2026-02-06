@@ -212,6 +212,7 @@ out:
 
 static void __exit ucache_core_exit(void)
 {
+	ucache_migrate_deinit();
 	device_destroy(ucache_dev_class, MKDEV(major, 0));
 	class_destroy(ucache_dev_class);
 	ucache_dev_class = NULL;

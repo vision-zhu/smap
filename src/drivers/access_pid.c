@@ -12,6 +12,7 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/pid.h>
+#include <linux/module.h>
 
 #include "check.h"
 #include "accessed_bit.h"
@@ -19,6 +20,7 @@
 #include "access_tracking.h"
 #include "access_mmu.h"
 #include "access_pid.h"
+#include "access_acpi_mem.h"
 
 #undef pr_fmt
 #define pr_fmt(fmt) "access_pid: " fmt
@@ -49,6 +51,9 @@ void destroy_access_pid(struct access_pid *elem)
 		elem->paddr_bm[i] = NULL;
 		vfree(elem->white_list_bm[i]);
 		elem->white_list_bm[i] = NULL;
+		vfree(elem->mig_last_remote_bm[i]);
+		elem->mig_last_remote_bm[i] = NULL;
+		elem->mig_last_remote_bm_len[i] = 0;
 		elem->bm_len[i] = 0;
 		elem->scan_count[i] = 0;
 		elem->page_num[i] = 0;
@@ -59,6 +64,57 @@ void destroy_access_pid(struct access_pid *elem)
 	}
 	kfree(elem);
 	return;
+}
+
+static int calc_paddr_acidx_any(u64 paddr, int *nid, u64 *index, int page_size)
+{
+	int ret;
+	ret = calc_paddr_acidx_iomem(paddr, nid, index, page_size);
+	if (!ret) {
+		return 0;
+	}
+	return calc_paddr_acidx_acpi(paddr, nid, index, page_size);
+}
+
+static void access_apply_last_cycle_remote_whitelist(struct access_pid *ap)
+{
+	int i;
+
+	if (!ap) {
+		return;
+	}
+
+	/*
+	 * Serialize with smap_access_whitelist_cycle_begin() which clears and
+	 * frees mig_last_remote_bm under ap_data.lock write-lock.
+	 */
+	down_read(&ap_data.lock);
+	for (i = 0; i < SMAP_MAX_NUMNODES; i++) {
+		unsigned long *dst = ap->white_list_bm[i];
+		unsigned long *src;
+		size_t src_words;
+		size_t words;
+		size_t j;
+
+		if (!dst || ap->bm_len[i] == 0) {
+			continue;
+		}
+
+		spin_lock(&ap->mig_wl_lock);
+		src = ap->mig_last_remote_bm[i];
+		src_words = ap->mig_last_remote_bm_len[i];
+		spin_unlock(&ap->mig_wl_lock);
+
+		if (!src || src_words == 0) {
+			continue;
+		}
+
+		words = min(ap->bm_len[i], src_words);
+		for (j = 0; j < words; j++) {
+			dst[j] |= src[j];
+		}
+	}
+	up_read(&ap_data.lock);
 }
 
 static void destroy_access_ham_pid(struct ham_tracking_info *elem)
@@ -233,12 +289,15 @@ int init_access_pid(struct access_add_pid_payload *payload,
 	ap->ntimes = payload->ntimes;
 	ap->type = payload->type;
 	init_completion(&ap->work_done);
+	spin_lock_init(&ap->mig_wl_lock);
 	for (int i = 0; i < SMAP_MAX_NUMNODES; i++) {
 		ap->scan_count[i] = 0;
 		ap->page_num[i] = 0;
 		ap->bm_len[i] = 0;
 		ap->paddr_bm[i] = NULL;
 		ap->white_list_bm[i] = NULL;
+		ap->mig_last_remote_bm_len[i] = 0;
+		ap->mig_last_remote_bm[i] = NULL;
 	}
 	if (is_access_hugepage()) {
 		if (init_vm_mapping_info(ap->pid, &ap->info)) {
@@ -964,6 +1023,7 @@ int access_walk_pagemap(struct access_pid *ap)
 		pr_err("unable to init access bitmap for pid: %d\n", ap->pid);
 		return ret;
 	}
+	access_apply_last_cycle_remote_whitelist(ap);
 	ret = init_vm_mapping(&ap->info);
 	if (ret)
 		return ret;
@@ -974,6 +1034,140 @@ int access_walk_pagemap(struct access_pid *ap)
 
 	return 0;
 }
+
+int smap_access_whitelist_cycle_begin(pid_t pid)
+{
+	struct access_pid *ap = NULL;
+	unsigned long *to_free[SMAP_MAX_NUMNODES] = { 0 };
+	int i;
+
+	down_write(&ap_data.lock);
+	list_for_each_entry(ap, &ap_data.list, node) {
+		if (ap->pid == pid) {
+			break;
+		}
+		ap = NULL;
+	}
+
+	if (!ap) {
+		up_write(&ap_data.lock);
+		return -ENOENT;
+	}
+
+	spin_lock(&ap->mig_wl_lock);
+	for (i = 0; i < SMAP_MAX_NUMNODES; i++) {
+		to_free[i] = ap->mig_last_remote_bm[i];
+		ap->mig_last_remote_bm[i] = NULL;
+		ap->mig_last_remote_bm_len[i] = 0;
+	}
+	spin_unlock(&ap->mig_wl_lock);
+	up_write(&ap_data.lock);
+
+	for (i = 0; i < SMAP_MAX_NUMNODES; i++) {
+		vfree(to_free[i]);
+	}
+	return 0;
+}
+EXPORT_SYMBOL_GPL(smap_access_whitelist_cycle_begin);
+
+int smap_access_whitelist_update(pid_t pid, u64 paddr, bool set)
+{
+	struct access_pid *ap = NULL;
+	unsigned long *bm;
+	size_t bm_words;
+	u64 bm_bits;
+	int page_size;
+	int nid;
+	u64 acidx;
+	int nid_pos;
+	unsigned long nodes;
+	int ret;
+	void *new_bm = NULL;
+
+	page_size = is_access_hugepage() ? PAGE_SIZE_2M : PAGE_SIZE_4K;
+	ret = calc_paddr_acidx_any(paddr, &nid, &acidx, page_size);
+	if (ret) {
+		return ret;
+	}
+	if (nid < 0 || nid >= SMAP_MAX_NUMNODES) {
+		return -EINVAL;
+	}
+
+	down_read(&ap_data.lock);
+	list_for_each_entry(ap, &ap_data.list, node) {
+		if (ap->pid == pid) {
+			break;
+		}
+		ap = NULL;
+	}
+	if (!ap) {
+		up_read(&ap_data.lock);
+		return -ENOENT;
+	}
+
+	nodes = ap->numa_nodes;
+	nid_pos = convert_nid_to_pos(nid);
+	if (nid_pos < 0 || !test_bit(nid_pos, &nodes)) {
+		up_read(&ap_data.lock);
+		return 0;
+	}
+
+	/* Only track remote pages for this feature. */
+	if (nid < nr_local_numa) {
+		up_read(&ap_data.lock);
+		return 0;
+	}
+
+	bm_bits = get_node_page_cnt_iomem(nid, page_size);
+	if (bm_bits == 0) {
+		up_read(&ap_data.lock);
+		return 0;
+	}
+	bm_words = BITS_TO_LONGS(bm_bits);
+
+	spin_lock(&ap->mig_wl_lock);
+	bm = ap->mig_last_remote_bm[nid];
+	if (!bm) {
+		spin_unlock(&ap->mig_wl_lock);
+		new_bm = vzalloc(bm_words * sizeof(unsigned long));
+		if (!new_bm) {
+			up_read(&ap_data.lock);
+			return -ENOMEM;
+		}
+		spin_lock(&ap->mig_wl_lock);
+		/* Another thread may have allocated it first. */
+		if (!ap->mig_last_remote_bm[nid]) {
+			ap->mig_last_remote_bm[nid] = new_bm;
+			ap->mig_last_remote_bm_len[nid] = bm_words;
+			new_bm = NULL;
+		}
+		bm = ap->mig_last_remote_bm[nid];
+	}
+	bm_words = ap->mig_last_remote_bm_len[nid];
+	spin_unlock(&ap->mig_wl_lock);
+
+	if (new_bm) {
+		vfree(new_bm);
+	}
+
+	if (!bm || bm_words == 0) {
+		up_read(&ap_data.lock);
+		return -ENOMEM;
+	}
+	if (acidx >= bm_bits) {
+		up_read(&ap_data.lock);
+		return 0;
+	}
+
+	if (set) {
+		set_bit(acidx, bm);
+	} else {
+		clear_bit(acidx, bm);
+	}
+	up_read(&ap_data.lock);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(smap_access_whitelist_update);
 
 struct access_pid *find_access_pid(pid_t pid)
 {

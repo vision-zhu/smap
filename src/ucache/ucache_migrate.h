@@ -24,6 +24,8 @@ int ucache_migrate_folios(int des_nid, struct folio **folios,
 
 struct migrate_success *get_migrate_success(int nid);
 
+void ucache_migrate_deinit(void);
+
 #ifdef __cplusplus
 }
 #endif
