@@ -79,6 +79,13 @@ static void smap_wl_resolve_symbols(void)
 	if (!smap_wl_update_fn) {
 		smap_wl_update_fn = symbol_get(smap_access_whitelist_update);
 	}
+	/*
+	 * If access module isn't loaded yet, symbol_get() returns NULL. Allow
+	 * retry later so load order doesn't permanently disable the feature.
+	 */
+	if (!smap_wl_begin_fn && !smap_wl_update_fn) {
+		smap_wl_resolve_tried = false;
+	}
 	mutex_unlock(&smap_wl_sym_lock);
 }
 
@@ -179,6 +186,20 @@ static pid_t smap_mig_pid_ctx_get_current(void)
 	}
 	spin_unlock(&smap_mig_pid_lock);
 	return pid;
+}
+
+void smap_mig_pid_ctx_cleanup_all(void)
+{
+	struct smap_mig_pid_ctx *ctx;
+	struct hlist_node *tmp;
+	int bkt;
+
+	spin_lock(&smap_mig_pid_lock);
+	hash_for_each_safe(smap_mig_pid_ht, bkt, tmp, ctx, node) {
+		hash_del(&ctx->node);
+		kfree(ctx);
+	}
+	spin_unlock(&smap_mig_pid_lock);
 }
 
 static void smap_put_new_node_page(struct folio *folio, unsigned long node);

@@ -33,4 +33,5 @@ void smap_handle_migrate_back_subtask(struct migrate_back_subtask *task);
 void smap_handle_migrate_back_subtask_4k(struct migrate_back_subtask *task);
 int do_migrate(struct migrate_msg *msg, struct mig_list *mig_list);
 void smap_whitelist_put_symbols(void);
+void smap_mig_pid_ctx_cleanup_all(void);
 #endif
