@@ -566,6 +566,7 @@ int init_migrate(void)
 
 void exit_migrate(void)
 {
+	smap_whitelist_put_symbols();
 	exit_mig_dev();
 	pr_info("exit SMAP migrate\n");
 }

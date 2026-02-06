@@ -8,6 +8,7 @@
 #define _SRC_ACCESS_PID_H
 
 #include <linux/bitops.h>
+#include <linux/spinlock.h>
 
 #include "check.h"
 #include "access_ioctl.h"
@@ -68,6 +69,17 @@ struct access_pid {
 	size_t bm_len[SMAP_MAX_NUMNODES];
 	unsigned long *paddr_bm[SMAP_MAX_NUMNODES];
 	unsigned long *white_list_bm[SMAP_MAX_NUMNODES];
+	/*
+	 * mig_last_remote_bm records the pages that were migrated to remote NUMA
+	 * in the last migration cycle, so they can be exported to user space as
+	 * part of white_list_bm in the next access bitmap snapshot.
+	 *
+	 * Protected by ap_data.lock (cycle begin uses write-lock) and
+	 * mig_wl_lock (bitmap updates).
+	 */
+	spinlock_t mig_wl_lock;
+	size_t mig_last_remote_bm_len[SMAP_MAX_NUMNODES]; /* words */
+	unsigned long *mig_last_remote_bm[SMAP_MAX_NUMNODES];
 	struct list_head node;
 	struct vm_mapping_info info;
 };
@@ -117,6 +129,10 @@ int access_walk_pagemap(struct access_pid *ap);
 struct access_pid *find_access_pid(pid_t pid);
 int read_pid_freq(pid_t pid, size_t *data_len, u16 **data);
 int convert_pos_to_paddr_sorted(pid_t pid, int nid, u64 len, u64 *addr);
+
+/* Called by tiering module via symbol_get(). */
+int smap_access_whitelist_cycle_begin(pid_t pid);
+int smap_access_whitelist_update(pid_t pid, u64 paddr, bool set);
 
 static inline bool access_pid_is_scanning(pid_t pid)
 {
