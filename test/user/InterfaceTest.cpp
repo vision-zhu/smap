@@ -1221,7 +1221,7 @@ TEST_F(InterfaceTest, TestIoctlHandlerTwo)
     const unsigned long *ioctlCommands;
     MOCKER(reinterpret_cast<int (*)(const char *, int)>(open)).stubs().will(returnValue(0));
     MOCKER(reinterpret_cast<int (*)(int, unsigned long, void *)>(ioctl)).stubs().will(returnValue(0));
-    MOCKER(close).stubs().will(ignoreReturnValue());
+    MOCKER((int (*)(int))close).stubs().will(ignoreReturnValue());
     ret = IoctlHandler(msg, pidType, ioctlCommands);
     EXPECT_EQ(0, ret);
 }
@@ -1234,7 +1234,7 @@ TEST_F(InterfaceTest, TestIoctlHandlerThree)
     const unsigned long *ioctlCommands;
     MOCKER(reinterpret_cast<int (*)(const char *, int)>(open)).stubs().will(returnValue(0));
     MOCKER(reinterpret_cast<int (*)(int, unsigned long, void *)>(ioctl)).stubs().will(returnValue(-1));
-    MOCKER(close).stubs().will(ignoreReturnValue());
+    MOCKER((int (*)(int))close).stubs().will(ignoreReturnValue());
     ret = IoctlHandler(msg, pidType, ioctlCommands);
     EXPECT_EQ(-EBADF, ret);
 }

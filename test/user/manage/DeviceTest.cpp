@@ -218,7 +218,7 @@ TEST_F(DeviceTest, TestIsLocalNumaOpenFailed)
     MOCKER((int (*)(char *, size_t, size_t, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue((FILE *)nullptr));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue((FILE *)nullptr));
     bool ret = IsLocalNuma(0);
     EXPECT_FALSE(ret);
 }
@@ -232,9 +232,9 @@ TEST_F(DeviceTest, TestIsLocalNumaReadFailed)
     MOCKER((int (*)(char *, size_t, size_t, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&tmpFile));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&tmpFile));
     MOCKER(fgetc).stubs().will(returnValue(EOF));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     bool ret = IsLocalNuma(0);
     EXPECT_FALSE(ret);
 }
@@ -247,9 +247,9 @@ TEST_F(DeviceTest, TestIsLocalNumaReadRemote)
     MOCKER((int (*)(char *, size_t, size_t, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&tmpFile));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&tmpFile));
     MOCKER(fgetc).stubs().will(returnValue(remoteValue));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     bool ret = IsLocalNuma(0);
     EXPECT_FALSE(ret);
 }
@@ -262,9 +262,9 @@ TEST_F(DeviceTest, TestIsLocalNumaReadLocal)
     MOCKER((int (*)(char *, size_t, size_t, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&tmpFile));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&tmpFile));
     MOCKER(fgetc).stubs().will(returnValue(localValue));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     bool ret = IsLocalNuma(0);
     EXPECT_TRUE(ret);
 }

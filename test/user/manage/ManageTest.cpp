@@ -124,7 +124,7 @@ TEST_F(ManageTest, TestIsQemuTaskPath)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
     ret = IsQemuTask(1);
     EXPECT_EQ(-1, ret);
 }
@@ -137,9 +137,9 @@ TEST_F(ManageTest, TestIsQemuTaskFile)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>(nullptr)));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = IsQemuTask(1);
     EXPECT_EQ(-1, ret);
 
@@ -147,10 +147,10 @@ TEST_F(ManageTest, TestIsQemuTaskFile)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     char buf[] = "1";
     MOCKER(fgets).stubs().will(returnValue(&buf[0]));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = IsQemuTask(1);
     EXPECT_EQ(0, ret);
 }
@@ -403,7 +403,7 @@ extern "C" FILE* OpenNumaMaps(pid_t pid);
 TEST_F(ManageTest, TestOpenNumaMaps)
 {
     int pid = 1;
-    MOCKER(fopen).stubs().will(returnValue(reinterpret_cast<FILE*>(0x1234)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(reinterpret_cast<FILE*>(0x1234)));
 
     FILE* ret = OpenNumaMaps(pid);
     EXPECT_NE(ret, nullptr);
@@ -834,10 +834,10 @@ TEST_F(ManageTest, TestProcessSmapsFile)
     unsigned long ret = ProcessSmapsFile(pid, targetLinePrefix, prefixLength, divisor);
     EXPECT_EQ(ret, 0);
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     char buf[] = "1";
     MOCKER(fgets).stubs().will(returnValue(&buf[0])).then(returnValue((static_cast<char *>(nullptr))));
-    MOCKER(fclose).stubs().will(returnValue(1));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(1));
     MOCKER((int (*)(char const *, char const *, void *))sscanf_s)
         .stubs()
         .will(returnValue(0));

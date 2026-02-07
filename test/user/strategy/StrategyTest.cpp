@@ -91,7 +91,7 @@ TEST_F(StrategyTest, TestGetNrFreePagesByNodeTwo)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
     ret = GetNrFreePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }
@@ -104,9 +104,9 @@ TEST_F(StrategyTest, TestGetNrFreePagesByNodeThree)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>(nullptr)));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = GetNrFreePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }
@@ -119,9 +119,9 @@ TEST_F(StrategyTest, TestGetNrFreePagesByNodeFour)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
-    MOCKER(fclose).stubs().will(returnValue(-1));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(-1));
     ret = GetNrFreePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }
@@ -144,7 +144,7 @@ TEST_F(StrategyTest, TestGetNrFreeHugePagesByNodeTwo)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
     ret = GetNrFreeHugePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }
@@ -157,9 +157,9 @@ TEST_F(StrategyTest, TestGetNrFreeHugePagesByNodeThree)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>(nullptr)));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = GetNrFreeHugePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }
@@ -172,12 +172,12 @@ TEST_F(StrategyTest, TestGetNrFreeHugePagesByNodeFour)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1")));
     MOCKER((int (*)(char const *, char const *, void *))sscanf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fclose).stubs().will(returnValue(-1));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(-1));
     ret = GetNrFreeHugePagesByNode(nid);
     EXPECT_EQ(0, ret);
 }

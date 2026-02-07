@@ -1063,7 +1063,7 @@ TEST_F(SmapConfigTest, TestRecoverFromConfig)
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(ReadConfig).expects(never());
     MOCKER(InitSmapConfig).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = RecoverFromConfig();
     EXPECT_EQ(-ENOENT, ret);
 
@@ -1071,7 +1071,7 @@ TEST_F(SmapConfigTest, TestRecoverFromConfig)
     MOCKER(DoesConfigExist).stubs().will(returnValue(true));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(ReadConfig).stubs().will(returnValue(0));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = RecoverFromConfig();
     EXPECT_EQ(0, ret);
 }
@@ -1089,7 +1089,7 @@ TEST_F(SmapConfigTest, TestRecoverFromConfigTwo)
     MOCKER(DoesConfigExist).stubs().will(returnValue(true));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd)).then(returnValue(-ENOENT));
     MOCKER(ReadConfig).stubs().will(returnValue(1));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = RecoverFromConfig();
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1118,7 +1118,7 @@ TEST_F(SmapConfigTest, TestSyncRunMode)
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(InitSmapConfig).stubs().will(returnValue(0));
     MOCKER(ChangeRunMode).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = SyncRunMode(runMode);
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1143,7 +1143,7 @@ TEST_F(SmapConfigTest, TestSyncRunModeThree)
     MOCKER(DoesConfigExist).stubs().will(returnValue(false));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(InitSmapConfig).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).stubs().will(returnValue(0));
+    MOCKER((int (*)(int))close).stubs().will(returnValue(0));
     ret = SyncRunMode(runMode);
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1196,7 +1196,7 @@ TEST_F(SmapConfigTest, TestSyncOneNumaConfig)
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(InitSmapConfig).stubs().will(returnValue(0));
     MOCKER(ChangeOneNumaConfig).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = SyncOneNumaConfig(local, remote, size);
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1229,7 +1229,7 @@ TEST_F(SmapConfigTest, TestSyncOneNumaConfigSuccess)
     MOCKER(DoesConfigExist).stubs().will(returnValue(true));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(ChangeOneNumaConfig).stubs().will(returnValue(0));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = SyncOneNumaConfig(local, remote, size);
     EXPECT_EQ(0, ret);
 }
@@ -1246,7 +1246,7 @@ TEST_F(SmapConfigTest, TestSyncOneNumaConfigThree)
     MOCKER(DoesConfigExist).stubs().will(returnValue(false));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(0));
     MOCKER(InitSmapConfig).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).stubs().will(returnValue(0));
+    MOCKER((int (*)(int))close).stubs().will(returnValue(0));
     ret = SyncOneNumaConfig(local, remote, size);
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1260,7 +1260,7 @@ TEST_F(SmapConfigTest, TestSyncAllProcessConfig)
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(InitSmapConfig).stubs().will(returnValue(0));
     MOCKER(ChangeProcessConfig).stubs().will(returnValue(-ENOENT));
-    MOCKER(close).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(int))close).expects(once()).will(returnValue(0));
     ret = SyncAllProcessConfig();
     EXPECT_EQ(-ENOENT, ret);
 }
@@ -1279,7 +1279,7 @@ TEST_F(SmapConfigTest, TestSyncAllProcessConfigTwo)
     MOCKER(DoesConfigExist).stubs().will(returnValue(false));
     MOCKER(RemoveAndOpenConfig).stubs().will(returnValue(fd));
     MOCKER(InitSmapConfig).stubs().will(returnValue(-EBADF));
-    MOCKER(close).stubs().will(returnValue(0));
+    MOCKER((int (*)(int))close).stubs().will(returnValue(0));
     ret = SyncAllProcessConfig();
     EXPECT_EQ(-EBADF, ret);
 }
