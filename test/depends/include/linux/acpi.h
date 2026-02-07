@@ -33,8 +33,14 @@ struct acpi_subtable_proc {
 };
 
 /* Provide symbols so DT build can link ACPI callers. */
+#ifdef __cplusplus
+extern "C" {
+#endif
 acpi_status acpi_get_table(char *signature, u32 instance,
 			   struct acpi_table_header **out_table);
 void acpi_put_table(struct acpi_table_header *table);
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* _LINUX_ACPI_H */
