@@ -66,6 +66,25 @@ struct delayed_work {
 	int cpu;
 };
 
+static inline bool cancel_delayed_work_sync(struct delayed_work *dwork)
+{
+	(void)dwork;
+	return true;
+}
+
+static inline bool queue_delayed_work(struct workqueue_struct *wq, struct delayed_work *dwork, unsigned long delay)
+{
+	(void)wq;
+	(void)dwork;
+	(void)delay;
+	return true;
+}
+
+static inline void destroy_workqueue(struct workqueue_struct *wq)
+{
+	(void)wq;
+}
+
 static inline struct delayed_work *to_delayed_work(struct work_struct *work)
 {
     return container_of(work, struct delayed_work, work);
