@@ -160,30 +160,10 @@ static inline struct vm_area_struct *vma_next(struct vma_iterator *vmi)
 {
 	return NULL;
 }
-static inline bool folio_test_large(struct folio *folio)
-{
-    return false;
-}
-static inline unsigned int folio_order(struct folio *folio)
-{
-	if (!folio_test_large(folio))
-		return 0;
-	return folio->_flags_1 & 0xff;
-}
-
-static inline size_t folio_size(struct folio *folio)
-{
-    return PAGE_SIZE << folio_order(folio);
-}
 
 static inline int folio_nid(const struct folio *folio)
 {
     return page_to_nid(&folio->page);
-}
-
-static inline unsigned long folio_pfn(struct folio *folio)
-{
-    return 0;
 }
 
 static inline struct folio *pfn_folio(unsigned long pfn)
