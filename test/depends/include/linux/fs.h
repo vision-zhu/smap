@@ -76,7 +76,7 @@ static inline struct file *filp_open(const char *filename, int flags, umode_t mo
     (void)filename;
     (void)flags;
     (void)mode;
-    return ERR_PTR(-ENOENT);
+    return (struct file *)ERR_PTR(-ENOENT);
 }
 
 static inline void filp_close(struct file *filp, fl_owner_t id)

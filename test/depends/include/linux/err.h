@@ -26,14 +26,9 @@ extern "C" {
 
 #define __must_check
 
-/* Basic ERR_PTR/IS_ERR helpers for DT build */
-#ifndef PTR_ERR
-#define PTR_ERR(ptr) ((long)(ptr))
-#endif
-
-#ifndef IS_ERR
-#define IS_ERR(ptr) IS_ERR_VALUE(ptr)
-#endif
+/* Provide function symbols so UT can MOCKER() them */
+bool IS_ERR(const void *ptr);
+long PTR_ERR(const void *ptr);
 
 static inline int __must_check PTR_ERR_OR_ZERO(__force const void *ptr)
 {
