@@ -14,4 +14,8 @@ extern rwlock_t rem_ram_list_lock;
 
 void walk_pid_pagemap(struct pagemapread *pm);
 struct mm_struct *get_mm_by_pid(pid_t pid);
+
+#ifdef USE_DT
+struct mm_struct *mock_get_mm_by_pid(pid_t pid);
+#endif
 #endif /* _SRC_ACCESS_MMU_H */
