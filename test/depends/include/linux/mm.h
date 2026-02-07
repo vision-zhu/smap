@@ -96,6 +96,8 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
     spin_unlock(ptl); \
 } while (0)
 
+struct vma_iterator;
+
 #if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 static inline spinlock_t *pte_lockptr(struct mm_struct *mm, pmd_t *pmd)
 {
@@ -151,7 +153,19 @@ static inline struct folio *pfn_folio(unsigned long pfn)
     return stubFolio;
 }
 
-#else /* KERNEL_VERSION(5, 10, 0) */
+#else
+static inline struct vm_area_struct *vma_find(struct vma_iterator *vmi, unsigned long max)
+{
+	(void)vmi;
+	(void)max;
+	return NULL;
+}
+
+static inline struct vm_area_struct *vma_next(struct vma_iterator *vmi)
+{
+	(void)vmi;
+	return NULL;
+}
 #endif /* LINUX_VERSION_CODE */
 
 
