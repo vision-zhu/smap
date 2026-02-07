@@ -17,6 +17,8 @@ add_compile_definitions(USE_DT)
 
 # include all source files
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/tiering TEST_SRC)
+# This file is intentionally excluded from the dt build (kept in repo).
+list(REMOVE_ITEM TEST_SRC ${CMAKE_CURRENT_LIST_DIR}/tiering/test_iomem.cpp)
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/drivers TEST_SRC)
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/user TEST_SRC)
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/user/manage TEST_SRC)

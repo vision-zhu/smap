@@ -98,9 +98,6 @@ fi
 cp -r ${CURRENT_PATH}/../src $DT_SRC_DIR
 
 code_dir=$(cd ${DT_SRC_DIR} && pwd)
-
-rm -f ${CURRENT_PATH}/tiering/test_iomem.cpp
-
 remove_static ${code_dir}/src
 remove_inline ${code_dir}/src
 rename_class ${code_dir}/src
