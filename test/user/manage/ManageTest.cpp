@@ -890,7 +890,7 @@ TEST_F(ManageTest, TestGetNumaNodesForPid)
     int node = 0;
     int ret = GetNumaNodesForPid(pid, &node);
     EXPECT_EQ(ret, -EINVAL);
-    MOCKER(sched_getaffinity).stubs().will(returnValue(0));
+    MOCKER((int (*)(int, unsigned long, cpu_set_t *))sched_getaffinity).stubs().will(returnValue(0));
     MOCKER(GetNodeFromCpu).stubs().will(returnValue(-EINVAL)).then(returnValue(0));
     ret = GetNumaNodesForPid(pid, &node);
     EXPECT_EQ(ret, 0);
@@ -1025,7 +1025,7 @@ TEST_F(ManageTest, TestBuildAllPidData)
     struct ProcessMemBitmap pmb = { .pid = 1025, .len = { 0, 0 } };
 
     g_processManager.processes = &processes;
-    MOCKER(clock).stubs().will(returnValue(static_cast<clock_t>(0)));
+    MOCKER((clock_t (*)(void))clock).stubs().will(returnValue(static_cast<clock_t>(0)));
     MOCKER(EnvMutexLock).stubs().will(ignoreReturnValue());
     MOCKER(EnvMutexUnlock).stubs().will(ignoreReturnValue());
     MOCKER(BuildAndFillBitmapBuf).stubs().will(returnValue(-EPERM));
