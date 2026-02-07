@@ -32,4 +32,9 @@ struct acpi_subtable_proc {
 	int count;
 };
 
+/* Provide symbols so DT build can link ACPI callers. */
+acpi_status acpi_get_table(char *signature, u32 instance,
+			   struct acpi_table_header **out_table);
+void acpi_put_table(struct acpi_table_header *table);
+
 #endif	/* _LINUX_ACPI_H */

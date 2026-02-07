@@ -15,6 +15,9 @@ extern int __node_distance(int from, int to);
 
 #define	NUMA_NO_NODE	(-1)
 
+/* ACPI SRAT helpers (stubbed in test/depends) */
+int pxm_to_node(int pxm);
+
 #ifdef CONFIG_NUMA_KEEP_MEMINFO
 #define __initdata_or_meminfo
 #else

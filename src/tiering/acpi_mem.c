@@ -154,7 +154,7 @@ int init_acpi_mem(void)
 	unsigned long table_size = sizeof(struct acpi_table_srat);
 	struct acpi_subtable_proc proc = {
 		.id = ACPI_SRAT_TYPE_MEMORY_AFFINITY,
-		.handler = acpi_parse_memory_affinity,
+		.handler = (acpi_tbl_entry_handler)acpi_parse_memory_affinity,
 	};
 
 	if (acpi_disabled) {
