@@ -571,6 +571,32 @@ TEST_F(MigrationTest, TestNumaSwapReduce)
     free(numaMemSwap);
 }
 
+TEST_F(MigrationTest, TestNumaSwapReduceMultipleNodesTotalTransfer)
+{
+    ProcessAttr attr = {};
+    int32_t* numaMemSwap = (int32_t*)calloc((LOCAL_NUMA_BITS + REMOTE_NUMA_BITS), sizeof(int32_t));
+    ASSERT_NE(nullptr, numaMemSwap);
+
+    // total mig-in = 200
+    numaMemSwap[0] = 100;
+    numaMemSwap[2] = 100;
+    // total mig-out = 200
+    numaMemSwap[1] = -50;
+    numaMemSwap[3] = -150;
+
+    MOCKER(GetNrLocalNuma).stubs().will(returnValue(LOCAL_NUMA_BITS));
+    NumaSwapReduce(&attr.strategyAttr, numaMemSwap);
+
+    uint64_t total = 0;
+    for (int from = 0; from < MAX_NODES; from++) {
+        for (int to = 0; to < MAX_NODES; to++) {
+            total += attr.strategyAttr.nrMigratePages[from][to];
+        }
+    }
+    EXPECT_EQ(200, total);
+    free(numaMemSwap);
+}
+
 extern "C" void NumaSwapMemPool(ProcessAttr *current);
 TEST_F(MigrationTest, TestNumaSwapMemPool)
 {

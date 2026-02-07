@@ -441,7 +441,7 @@ static void NumaSwapReduce(StrategyAttribute *strategyAttr, int32_t *numaMemSwap
         if (migInNum[migInIdx].amount == 0) {
             migInIdx++;
         }
-        if (migOutNum[migInIdx].amount == 0) {
+        if (migOutNum[migOutIdx].amount == 0) {
             migOutIdx++;
         }
     }
