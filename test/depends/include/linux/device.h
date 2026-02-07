@@ -13,6 +13,8 @@
 #include <linux/kobject.h>
 #include <linux/types.h>
 #include <linux/gfp.h>
+#include <linux/device/bus.h>
+#include <linux/device/driver.h>
 #include <linux/bug.h>
 #include <linux/device/class.h>
 #include <linux/byteorder/generic.h>
