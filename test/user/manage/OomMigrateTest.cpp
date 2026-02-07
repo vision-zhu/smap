@@ -274,7 +274,7 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemap)
     static FILE fake_file;
     static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
@@ -323,7 +323,7 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapThird)
     static FILE fake_file;
     static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
@@ -352,7 +352,7 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapForth)
     static FILE fake_file;
     static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
@@ -372,7 +372,7 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRange)
     struct MigList mList;
     uint64_t pageCount = 10;
 
-    MOCKER(lseek).stubs().will(returnValue((off_t)-1));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue((off_t)-1));
     ret = GetPaddrFromMemRange(pagemapFd, start, end, &mList, &pageCount);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -387,7 +387,7 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRangeSecond)
     struct MigList mList;
     uint64_t pageCount = 10;
 
-    MOCKER(lseek).stubs().will(returnValue(0));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue(0));
     MOCKER((long (*)(int, void *, unsigned long))read).stubs().will(returnValue(0));
     ret = GetPaddrFromMemRange(pagemapFd, start, end, &mList, &pageCount);
     EXPECT_EQ(-EINVAL, ret);
