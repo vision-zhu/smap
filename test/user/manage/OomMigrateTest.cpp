@@ -65,12 +65,12 @@ TEST_F(OomMigrateTest, TestInitMigList)
     mockProcess.strategyAttr.l3RemoteMemRatio[0][0] = 50;
 
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(-1));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(-1));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(-1, ret);
     GlobalMockObject::verify();
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     MOCKER(GetPidNrPages).stubs().will(returnValue(sumPages));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(0, ret);
@@ -93,7 +93,7 @@ TEST_F(OomMigrateTest, TestInitMigListSecond)
     mockProcess.strategyAttr.l3RemoteMemRatio[0][0] = 100;
 
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     MOCKER(GetPidNrPages).stubs().will(returnValue(sumPages));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(0, ret);
@@ -102,7 +102,7 @@ TEST_F(OomMigrateTest, TestInitMigListSecond)
     GlobalMockObject::verify();
     node = -1;
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -125,7 +125,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrate)
     }
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(0));
     MOCKER(GetPaddrsFromPagemap).stubs().will(returnValue(0));
     MOCKER(close).stubs().will(ignoreReturnValue());
@@ -142,7 +142,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateSecond)
     mList.nr = 0;
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(0, mList.nr);
@@ -157,7 +157,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateThird)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(-1));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(-1));
     MOCKER(OpenPidPagemapFile).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(1, mList.nr);
@@ -173,7 +173,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateForth)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(-1));
     MOCKER(GetPaddrsFromPagemap).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
@@ -190,7 +190,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateFifth)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(0));
     MOCKER(GetPaddrsFromPagemap).stubs().will(returnValue(-1));
     MOCKER(close).stubs().will(ignoreReturnValue());
@@ -216,7 +216,7 @@ TEST_F(OomMigrateTest, TestFindPidMigrateSizeAbnormalOne)
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
     MOCKER(InitOomMigrateMsg)
         .stubs()
-        .with(outBoundP(&mMsg, sizeof(struct MigrateMsg)), any())
+        .with(outBoundP(&mMsg, sizeof(struct MigrateMsg)), mockcpp::any())
         .will(returnValue(1));
     FindPidMigrateSize(size);
     EXPECT_EQ(1, mMsg.cnt);

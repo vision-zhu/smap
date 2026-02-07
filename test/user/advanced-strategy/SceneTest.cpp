@@ -392,11 +392,11 @@ TEST_F(SceneTest, TestBalanceSurpluses)
 
     arr[0] = 1;
     arr[1] = 0;
-    MOCKER(DistributeExtraPages).stubs().with(outBoundP(arr, sizeof(arr)), any());
+    MOCKER(DistributeExtraPages).stubs().with(outBoundP(arr, sizeof(arr)), mockcpp::any());
     BalanceSurpluses(arr, 4);
 
     arr[2] = -3;
-    MOCKER(DistributeInsufficientPages).stubs().with(outBoundP(arr, sizeof(arr)), any());
+    MOCKER(DistributeInsufficientPages).stubs().with(outBoundP(arr, sizeof(arr)), mockcpp::any());
     BalanceSurpluses(arr, 4);
 }
 

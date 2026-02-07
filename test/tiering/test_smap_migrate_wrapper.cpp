@@ -63,7 +63,7 @@ TEST_F(SmapMigrateWrapperTest, SmapAllocHugePageNode)
     struct folio *old_folio = (struct folio *)kmalloc(sizeof(struct folio*), GFP_KERNEL);
     MOCKER(get_hugetlb_folio_nodemask)
         .stubs()
-        .with(any())
+        .with(mockcpp::any())
         .will(returnValue((struct folio*)NULL));
     new_folio = smap_alloc_huge_page_node(old_folio, 0, false);
     EXPECT_EQ(NULL, new_folio);

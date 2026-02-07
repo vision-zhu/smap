@@ -1047,7 +1047,7 @@ TEST_F(ManageTest, TestBuildAllPidData)
         .will(returnValue(0));
     MOCKER(ParseBitmap)
         .stubs()
-        .with(any(), any(), outBoundP(&len, sizeof(len)), outBoundP(&pmb, sizeof(pmb)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&len, sizeof(len)), outBoundP(&pmb, sizeof(pmb)))
         .will(returnValue(0));
     MOCKER(SetPidNrPages).stubs().will(ignoreReturnValue());
     MOCKER(FillPidData).stubs().will(returnValue(0));

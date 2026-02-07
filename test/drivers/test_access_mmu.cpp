@@ -437,7 +437,7 @@ TEST_F(AccessMMUTest, FillAPPAddrBM)
     unsigned long start_vaddr = 0;
     MOCKER(IS_ERR).stubs().will(returnValue(false));
     MOCKER(mock_get_mm_by_pid).stubs().will(returnValue(&mm1));
-    MOCKER(pos_to_addr).stubs().with(any(), any(), outBoundP(&start_vaddr, sizeof(start_vaddr)));
+    MOCKER(pos_to_addr).stubs().with(mockcpp::any(), mockcpp::any(), outBoundP(&start_vaddr, sizeof(start_vaddr)));
     MOCKER(walk_page_range).stubs().will(ignoreReturnValue());
     walk_pid_pagemap(&pm);
     EXPECT_EQ(16384, pm.len);

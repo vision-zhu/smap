@@ -830,7 +830,7 @@ TEST_F(SmapConfigTest, TestChangeProcessConfigExtendFile)
     size_t newLen = 48;
     struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN, .totalLen = oldLen };
 
-    MOCKER(ParseHeader).stubs().with(any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
+    MOCKER(ParseHeader).stubs().with(mockcpp::any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
     MOCKER(BuildAllProcessPayload).stubs().will(returnValue(0));
     MOCKER(CalcConfigLen).stubs().will(returnValue(newLen));
     MOCKER(TruncateConfig).stubs().will(returnValue(0));
@@ -847,7 +847,7 @@ TEST_F(SmapConfigTest, TestChangeProcessConfigShrinkFile)
     size_t newLen = 20;
     struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN, .totalLen = oldLen };
 
-    MOCKER(ParseHeader).stubs().with(any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
+    MOCKER(ParseHeader).stubs().with(mockcpp::any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
     MOCKER(BuildAllProcessPayload).stubs().will(returnValue(0));
     MOCKER(CalcConfigLen).stubs().will(returnValue(newLen));
     MOCKER(TruncateConfig).stubs().will(returnValue(-EPERM));

@@ -62,7 +62,7 @@ TEST_F(MigrateBackDebugfsTest, CreateMigrateDebugfs)
 
     struct dentry *dentryTmp = (struct dentry *)kmalloc(sizeof(*dentryTmp), GFP_KERNEL);
     ASSERT_NE(nullptr, dentryTmp);
-    MOCKER(debugfs_lookup).stubs().with(any(), any()).will(returnValue(dentryTmp));
+    MOCKER(debugfs_lookup).stubs().with(mockcpp::any(), mockcpp::any()).will(returnValue(dentryTmp));
     create_migrate_back_debugfs(taskTmp);
 
     kfree(dentryTmp);
@@ -78,7 +78,7 @@ TEST_F(MigrateBackDebugfsTest, RemoveMigrateDebugfs)
 
     struct dentry *dentryTmp = (struct dentry *)kmalloc(sizeof(*dentryTmp), GFP_KERNEL);
     ASSERT_NE(nullptr, dentryTmp);
-    MOCKER(debugfs_lookup).stubs().with(any(), any()).will(returnValue(dentryTmp));
+    MOCKER(debugfs_lookup).stubs().with(mockcpp::any(), mockcpp::any()).will(returnValue(dentryTmp));
     remove_migrate_back_debugfs(taskTmp);
 
     kfree(dentryTmp);

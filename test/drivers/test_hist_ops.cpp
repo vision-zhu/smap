@@ -380,7 +380,7 @@ TEST_F(HistOpsTest, do_hist_scan_sliding)
     seg[0].size = 0x100000;
     info.segs = seg;
     MOCKER(generate_aligned_16gb_wins_info).stubs()
-        .with(outBoundP(&info, sizeof(info)), any()).will(returnValue(0));
+        .with(outBoundP(&info, sizeof(info)), mockcpp::any()).will(returnValue(0));
     MOCKER(smap_hist_middle_set_scan_config).stubs().will(returnValue(0));
     MOCKER(smap_hist_middle_read).stubs().will(returnValue(0));
     MOCKER(copy_actc_to_buf).stubs();

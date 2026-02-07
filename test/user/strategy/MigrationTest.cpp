@@ -350,7 +350,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationEmptyProcesses)
     int change = 0;
     struct ProcessManager manager = { .processes = nullptr };
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     MOCKER(CleanStrategyAttribute).stubs().will(returnValue(0));
     MOCKER(BuildAllPidData).stubs().will(returnValue(0));
     ret = PerformMigrationPreparation(&manager);
@@ -364,7 +364,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationBuildError)
     ProcessAttr process;
     struct ProcessManager manager = { .processes = &process };
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     MOCKER(CleanStrategyAttribute).stubs().will(returnValue(0));
     MOCKER(BuildAllPidData).stubs().will(returnValue(-ENOMEM));
     ret = PerformMigrationPreparation(&manager);
@@ -387,7 +387,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationRamChanged)
     int change = 1;
     struct ProcessManager manager;
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     ret = PerformMigrationPreparation(&manager);
     EXPECT_EQ(-EBUSY, ret);
 }

@@ -92,11 +92,11 @@ long AccessIoctlTestKernel::checkIoctlAddPid(struct access_add_pid_msg msg)
     m_msg = msg;
     MOCKER(copy_from_user)
         .stubs()
-        .with(any(), checkWith(checkCopyFromUserIsMsg))
+        .with(mockcpp::any(), checkWith(checkCopyFromUserIsMsg))
         .will(invoke(AccessIoctlTestKernel::mockCopyFromUserSetMsg));
     MOCKER(copy_from_user)
         .stubs()
-        .with(any(), checkWith(checkCopyFromUserIsPayload))
+        .with(mockcpp::any(), checkWith(checkCopyFromUserIsPayload))
         .will(invoke(AccessIoctlTestKernel::mockCopyFromUserSetPayload));
     ret = ioctl_add_pid(&m_msg);
     return ret;

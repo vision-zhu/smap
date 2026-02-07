@@ -41,7 +41,7 @@ TEST_F(VirtTest, TestExtractIdFromCmdline)
     int id;
     MOCKER((int (*)(char const *, char const *, void *))sscanf_s)
         .stubs()
-        .with(any(), any(), outBoundP((void*)&mockId, sizeof(int)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP((void*)&mockId, sizeof(int)))
         .will(returnValue(3));
     ret = ExtractIdFromCmdline(cmdline, sizeof(cmdline), &id);
     EXPECT_EQ(0, ret);

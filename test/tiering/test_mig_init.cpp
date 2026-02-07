@@ -575,7 +575,7 @@ static void IoctlMigrateE2ETestMock(struct migrate_msg *msg, unsigned int pageSi
         MOCKER(is_filter_4k).stubs().will(returnValue(-1));
         for (int i = 0; i < msg->cnt; ++i) {
             MOCKER(smap_check_huge_page_for_migration).stubs()
-                .with(any(), eq(msg->mig_list[i].pid))
+                .with(mockcpp::any(), eq(msg->mig_list[i].pid))
                 .will(repeat(0, mockCanMig2MPageNrEachMigList))
                 .then(returnValue(1));
         }
@@ -588,12 +588,12 @@ static void IoctlMigrateE2ETestMock(struct migrate_msg *msg, unsigned int pageSi
         .with(outBoundP(static_cast<void*>(msg), sizeof(struct migrate_msg*)))
         .will(returnValue(0UL));
     MOCKER(build_migrate_list).stubs()
-        .with(any(), outBoundP(static_cast<struct mig_list**>(&migList), sizeof(struct mig_list**)))
+        .with(mockcpp::any(), outBoundP(static_cast<struct mig_list**>(&migList), sizeof(struct mig_list**)))
         .will(returnValue(0));
     MOCKER(pfn_to_online_page).stubs().will(returnValue(&page));
     MOCKER(IS_ERR).stubs().will(returnValue(false));
     MOCKER(isolate_and_migrate_folios).stubs()
-        .with(any(), any(), any(), any(), any(), any(),
+        .with(mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(),
              outBoundP(static_cast<unsigned int*>(&mockSuccessMig4KPageNrEachMigList), sizeof(unsigned int*)))
         .will(returnValue(0));
     MOCKER(free_migrate_list_addr).stubs().will(ignoreReturnValue());

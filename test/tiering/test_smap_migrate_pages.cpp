@@ -133,7 +133,7 @@ TEST_F(SmapMigratePagesTest, TestSmapAddPageTwo)
     MOCKER(IS_ERR).stubs().will(returnValue(false));
     MOCKER(PageHuge).stubs().will(returnValue(1));
     MOCKER(PageHead).stubs().will(returnValue(1));
-    MOCKER(find_page_task).stubs().with(any(), any(), outBoundP(&pta, sizeof(struct page_task_arg)));
+    MOCKER(find_page_task).stubs().with(mockcpp::any(), mockcpp::any(), outBoundP(&pta, sizeof(struct page_task_arg)));
     int ret = smap_add_page_for_migration(page, nullptr, nullptr, pid, migrate_all);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -151,7 +151,7 @@ TEST_F(SmapMigratePagesTest, TestSmapAddPageThree)
     MOCKER(IS_ERR).stubs().will(returnValue(false));
     MOCKER(PageHuge).stubs().will(returnValue(1));
     MOCKER(PageHead).stubs().will(returnValue(1));
-    MOCKER(find_page_task).stubs().with(any(), any(), outBoundP(&pta, sizeof(struct page_task_arg)));
+    MOCKER(find_page_task).stubs().with(mockcpp::any(), mockcpp::any(), outBoundP(&pta, sizeof(struct page_task_arg)));
     int ret = smap_add_page_for_migration(page, folios, &nr_folios, pid, migrate_all);
     EXPECT_EQ(0, ret);
     EXPECT_EQ(1, nr_folios);
@@ -315,7 +315,7 @@ TEST_F(SmapMigratePagesTest, TestAddPageForMigrateBackOne)
     int dest_nid = 1;
     bool migrate_all = true;
 
-    MOCKER(pfn_valid).stubs().with(any()).will(returnValue(false));
+    MOCKER(pfn_valid).stubs().with(mockcpp::any()).will(returnValue(false));
     int ret = smap_add_page_for_migrate_back(pa, nullptr, nullptr, dest_nid, migrate_all);
     EXPECT_EQ(ret, -ENXIO);
 }
@@ -326,7 +326,7 @@ TEST_F(SmapMigratePagesTest, TestAddPageForMigrateBackTwo)
     int dest_nid = 1;
     bool migrate_all = true;
 
-    MOCKER(pfn_valid).stubs().with(any()).will(returnValue(true));
+    MOCKER(pfn_valid).stubs().with(mockcpp::any()).will(returnValue(true));
     int ret = smap_add_page_for_migrate_back(pa, nullptr, nullptr, dest_nid, migrate_all);
     EXPECT_EQ(ret, -EIO);
 }
@@ -337,9 +337,9 @@ TEST_F(SmapMigratePagesTest, TestAddPageForMigrateBackThree)
     int dest_nid = 1;
     bool migrate_all = true;
 
-    MOCKER(pfn_valid).stubs().with(any()).will(returnValue(true));
-    MOCKER(pfn_to_online_page).stubs().with(any()).will(returnValue((page*)-1));
-    MOCKER(PTR_ERR).stubs().with(any()).will(returnValue(-1));
+    MOCKER(pfn_valid).stubs().with(mockcpp::any()).will(returnValue(true));
+    MOCKER(pfn_to_online_page).stubs().with(mockcpp::any()).will(returnValue((page*)-1));
+    MOCKER(PTR_ERR).stubs().with(mockcpp::any()).will(returnValue(-1));
     int ret = smap_add_page_for_migrate_back(pa, nullptr, nullptr, dest_nid, migrate_all);
     EXPECT_EQ(ret, -1);
 }
@@ -354,13 +354,13 @@ TEST_F(SmapMigratePagesTest, TestAddPageForMigrateBackFour)
     unsigned int mig_pages_cnt[SMAP_MAX_LOCAL_NUMNODES] = { 0 };
     struct folio **migrate_folios[SMAP_MAX_LOCAL_NUMNODES] = { nullptr };
     migrate_folios[1] = (struct folio**)vzalloc(2 * sizeof(struct folio*));
-    MOCKER(pfn_valid).stubs().with(any()).will(returnValue(true));
-    MOCKER(pfn_to_online_page).stubs().with(any()).will(returnValue((page*)-1));
-    MOCKER(PTR_ERR).stubs().with(any()).will(returnValue(0));
-    MOCKER(IS_ERR).stubs().with(any()).will(returnValue(false));
-    MOCKER(PageHuge).stubs().with(any()).will(returnValue(1));
-    MOCKER(PageHead).stubs().with(any()).will(returnValue(1));
-    MOCKER(find_page_task).stubs().with(any(), any(), outBoundP(&pta, sizeof(struct page_task_arg)));
+    MOCKER(pfn_valid).stubs().with(mockcpp::any()).will(returnValue(true));
+    MOCKER(pfn_to_online_page).stubs().with(mockcpp::any()).will(returnValue((page*)-1));
+    MOCKER(PTR_ERR).stubs().with(mockcpp::any()).will(returnValue(0));
+    MOCKER(IS_ERR).stubs().with(mockcpp::any()).will(returnValue(false));
+    MOCKER(PageHuge).stubs().with(mockcpp::any()).will(returnValue(1));
+    MOCKER(PageHead).stubs().with(mockcpp::any()).will(returnValue(1));
+    MOCKER(find_page_task).stubs().with(mockcpp::any(), mockcpp::any(), outBoundP(&pta, sizeof(struct page_task_arg)));
     int ret = smap_add_page_for_migrate_back(pa, migrate_folios, mig_pages_cnt, dest_nid, migrate_all);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(mig_pages_cnt[1], 1);
@@ -406,7 +406,7 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtaskOne)
     MOCKER(PageHead).stubs().will(returnValue(1));
     MOCKER(smap_add_page_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(&nr_folios, sizeof(nr_folios)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&nr_folios, sizeof(nr_folios)), mockcpp::any(), mockcpp::any())
         .will(returnValue(0));
     MOCKER(smap_migrate).stubs().will(returnValue(0));
     smap_handle_migrate_back_subtask(&task);
@@ -429,7 +429,7 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtaskTwo)
     MOCKER(PageHead).stubs().will(returnValue(1));
     MOCKER(smap_add_page_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(&nr_folios, sizeof(nr_folios)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&nr_folios, sizeof(nr_folios)), mockcpp::any(), mockcpp::any())
         .will(returnValue(1));
     MOCKER(smap_migrate).stubs().will(returnValue(1));
     smap_handle_migrate_back_subtask(&task);
@@ -469,7 +469,7 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtask4K)
     mig_pages_cnt[0] = 1;
     MOCKER(refresh_nodes_nr_free).stubs().will(ignoreReturnValue());
     MOCKER(process_pages_for_migration).stubs()
-    .with(any(), any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), any(), any())
+    .with(mockcpp::any(), mockcpp::any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), mockcpp::any(), mockcpp::any())
     .will(ignoreReturnValue());
     MOCKER(smap_migrate).stubs().will(returnValue(0));
     smap_handle_migrate_back_subtask_4k(&task);
@@ -485,7 +485,7 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtask4KMigrateFail)
     unsigned int mig_pages_cnt[SMAP_MAX_LOCAL_NUMNODES] = { 1 };
     MOCKER(refresh_nodes_nr_free).stubs().will(ignoreReturnValue());
     MOCKER(process_pages_for_migration).stubs()
-        .with(any(), any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), mockcpp::any(), mockcpp::any())
         .will(ignoreReturnValue());
     MOCKER(smap_migrate).stubs().will(returnValue(5));
     smap_handle_migrate_back_subtask_4k(&task);
@@ -501,7 +501,7 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtask4KEmptyMigration)
     unsigned int mig_pages_cnt[SMAP_MAX_LOCAL_NUMNODES] = {};
     MOCKER(refresh_nodes_nr_free).stubs().will(ignoreReturnValue());
     MOCKER(process_pages_for_migration).stubs()
-        .with(any(), any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)), mockcpp::any(), mockcpp::any())
         .will(ignoreReturnValue());
     MOCKER(smap_migrate).stubs().will(returnValue(0));
     smap_handle_migrate_back_subtask_4k(&task);
@@ -519,8 +519,8 @@ TEST_F(SmapMigratePagesTest, TestSmapHandleMigrateBackSubtask4KPreMigrateFail)
     MOCKER(refresh_nodes_nr_free).stubs().will(ignoreReturnValue());
     MOCKER(process_pages_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)),
-              outBoundP(&nr_pre_migrate_fail, sizeof(nr_pre_migrate_fail)), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(mig_pages_cnt, sizeof(mig_pages_cnt)),
+              outBoundP(&nr_pre_migrate_fail, sizeof(nr_pre_migrate_fail)), mockcpp::any())
         .will(ignoreReturnValue());
     MOCKER(smap_migrate).stubs().will(returnValue(0));
     smap_handle_migrate_back_subtask_4k(&task);
@@ -545,7 +545,7 @@ TEST_F(SmapMigratePagesTest, TestAllocDemotePage)
     int nid = 1;
     struct folio *page = (struct folio *)kmalloc(sizeof(struct folio), GFP_KERNEL);
     struct folio *new_page = nullptr;
-    MOCKER(alloc_migration_target).stubs().with(any(), any()).will(returnValue(static_cast<struct folio*>(nullptr)));
+    MOCKER(alloc_migration_target).stubs().with(mockcpp::any(), mockcpp::any()).will(returnValue(static_cast<struct folio*>(nullptr)));
 
     new_page =  alloc_demote_page(page, static_cast<unsigned long>(nid));
     EXPECT_EQ(new_page, nullptr);
@@ -557,8 +557,8 @@ TEST_F(SmapMigratePagesTest, TestSmapAllocNewNodePage)
     int nid = 1;
     struct folio *page = (struct folio *)kmalloc(sizeof(struct folio), GFP_KERNEL);
     struct folio *new_page = nullptr;
-    MOCKER(alloc_demote_page).stubs().with(any(), any()).will(returnValue(static_cast<struct folio*>(nullptr)));
-    MOCKER(folio_test_hugetlb).stubs().with(any()).will(returnValue(false));
+    MOCKER(alloc_demote_page).stubs().with(mockcpp::any(), mockcpp::any()).will(returnValue(static_cast<struct folio*>(nullptr)));
+    MOCKER(folio_test_hugetlb).stubs().with(mockcpp::any()).will(returnValue(false));
     new_page =  smap_alloc_new_node_page(page, static_cast<unsigned long>(nid));
     EXPECT_EQ(new_page, nullptr);
     kfree(page);
@@ -663,7 +663,7 @@ TEST_F(SmapMigratePagesTest, DoMigrateMultiListFailed)
     MOCKER(is_filter_4k).stubs().will(returnValue(-1));
     MOCKER(smap_add_page_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(&nr_folios, sizeof(nr_folios)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&nr_folios, sizeof(nr_folios)), mockcpp::any(), mockcpp::any())
         .will(returnValue(0));
     MOCKER(smu_migrate).stubs().will(returnValue(1)).then(returnValue(0));
     int ret = do_migrate(&msg, mig_list);
@@ -706,7 +706,7 @@ TEST_F(SmapMigratePagesTest, DoMigrateSingleListSuccess)
     MOCKER(is_filter_4k).stubs().will(returnValue(-1));
     MOCKER(smap_add_page_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(&nr_folios, sizeof(nr_folios)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&nr_folios, sizeof(nr_folios)), mockcpp::any(), mockcpp::any())
         .will(returnValue(0));
     MOCKER(smu_migrate).stubs().will(returnValue(0));
     MOCKER(kfree).stubs().will(ignoreReturnValue());
@@ -756,7 +756,7 @@ TEST_F(SmapMigratePagesTest, DoMigrateSingleListFailed)
     MOCKER(is_filter_4k).stubs().will(returnValue(-1));
     MOCKER(smap_add_page_for_migration)
         .stubs()
-        .with(any(), any(), outBoundP(&nr_folios, sizeof(nr_folios)), any(), any())
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&nr_folios, sizeof(nr_folios)), mockcpp::any(), mockcpp::any())
         .will(returnValue(1));
     MOCKER(smu_migrate).stubs().will(returnValue(1));
     MOCKER(kfree).stubs().will(ignoreReturnValue());
