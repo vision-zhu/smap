@@ -229,14 +229,27 @@ cd $BUILD_DIR || {
     exit 1;
 }
 
-mock_patch_path=$CURRENT_PATH/3rdparty/mockcpp/mockcpp_support_arm64.patch
-if [[ ! -e "$mock_patch_path" ]]
+mockcpp_dir="$CURRENT_PATH/3rdparty/mockcpp"
+mock_patch_src="$CURRENT_PATH/3rdparty/mockcpp_support_arm64.patch"
+mock_patch_dst="$mockcpp_dir/mockcpp_support_arm64.patch"
+
+dos2unix "$mock_patch_src"
+cp "$mock_patch_src" "$mock_patch_dst"
+
+cd "$mockcpp_dir"
+dos2unix src/UnixCodeModifier.cpp
+
+if git apply --check mockcpp_support_arm64.patch >/dev/null 2>&1
 then
-    dos2unix $CURRENT_PATH/3rdparty/mockcpp_support_arm64.patch
-    cp -r $CURRENT_PATH/3rdparty/mockcpp_support_arm64.patch $CURRENT_PATH/3rdparty/mockcpp
-    cd $CURRENT_PATH/3rdparty/mockcpp
-    dos2unix src/UnixCodeModifier.cpp
     git apply mockcpp_support_arm64.patch
+else
+    if git apply --reverse --check mockcpp_support_arm64.patch >/dev/null 2>&1
+    then
+        echo "mockcpp_support_arm64.patch already applied, skipping"
+    else
+        echo "Fatal! mockcpp_support_arm64.patch cannot be applied cleanly."
+        exit 1
+    fi
 fi
 cd $CURRENT_PATH/build
  
