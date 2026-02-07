@@ -94,7 +94,7 @@ TEST_F(ManageTest, TestPidIsValid)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(access).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(0));
     ret = PidIsValid(1);
     EXPECT_EQ(ret, true);
     GlobalMockObject::verify();
@@ -806,7 +806,7 @@ TEST_F(ManageTest, TestInitPidActcData)
     ret = InitPidActcData(attr);
     EXPECT_EQ(0, ret);
 
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
     ret = InitPidActcData(attr);
     EXPECT_EQ(-ENOMEM, ret);
     free(attr);
@@ -875,7 +875,7 @@ TEST_F(ManageTest, TestGetNodeFromCpu)
     int cpu = 1234;
     int ret = GetNodeFromCpu(cpu);
     EXPECT_EQ(ret, -EINVAL);
-    MOCKER(access).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(0));
     ret = GetNodeFromCpu(cpu);
     EXPECT_EQ(ret, 0);
 }
