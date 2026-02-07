@@ -2,9 +2,11 @@
 #ifndef TEST_DRIVER_H
 #define TEST_DRIVER_H
 
-#include <linux/device/bus.h>
-#include <linux/module.h>
-#include <linux/device.h>
+#include <linux/types.h>
+
+struct device;
+struct bus_type;
+struct module;
 
 #define ACPI_ID_LEN	16
 struct acpi_device_id {

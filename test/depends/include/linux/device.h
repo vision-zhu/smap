@@ -13,8 +13,6 @@
 #include <linux/kobject.h>
 #include <linux/types.h>
 #include <linux/gfp.h>
-#include <linux/device/bus.h>
-#include <linux/device/driver.h>
 #include <linux/bug.h>
 #include <linux/device/class.h>
 #include <linux/byteorder/generic.h>
@@ -24,6 +22,10 @@ extern "C" {
 #endif
 
 #define KBUILD_MODNAME "tracking_bus"
+
+struct resource;
+struct device_driver;
+struct bus_type;
 
 struct device {
     struct kobject kobj;

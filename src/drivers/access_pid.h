@@ -8,6 +8,7 @@
 #define _SRC_ACCESS_PID_H
 
 #include <linux/bitops.h>
+#include <linux/string.h>
 
 #include "check.h"
 #include "access_ioctl.h"
