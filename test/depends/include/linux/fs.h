@@ -45,6 +45,9 @@ struct file {
 	struct inode *f_inode;	/* cached value */
 };
 
+struct kiocb;
+struct iov_iter;
+
 struct file_operations {
 	long (*unlocked_ioctl) (struct file *f, unsigned int cmd, unsigned long arg);
 	int (*release) (struct inode *i, struct file *f);
