@@ -224,13 +224,13 @@ TEST_F(SmapConfigTest, TestTruncateConfig)
     int fd;
     size_t len;
 
-    MOCKER(ftruncate).stubs().will(returnValue(NORMAL_ERR));
+    MOCKER((int (*)(int, long))ftruncate).stubs().will(returnValue(NORMAL_ERR));
     errno = EINVAL;
     ret = TruncateConfig(fd, len);
     EXPECT_EQ(-EINVAL, ret);
 
     GlobalMockObject::verify();
-    MOCKER(ftruncate).stubs().will(returnValue(0));
+    MOCKER((int (*)(int, long))ftruncate).stubs().will(returnValue(0));
     ret = TruncateConfig(fd, len);
     EXPECT_EQ(0, ret);
 }
@@ -245,12 +245,12 @@ TEST_F(SmapConfigTest, TestMapConfig)
     int prot;
     int flags;
 
-    MOCKER(mmap).stubs().will(returnValue(MAP_FAILED));
+    MOCKER((void *(*)(void *, unsigned long, int, int, int, long))mmap).stubs().will(returnValue(MAP_FAILED));
     ret = MapConfig(fd, len, prot, flags);
     EXPECT_EQ(nullptr, ret);
 
     GlobalMockObject::verify();
-    MOCKER(mmap).stubs().will(returnValue(reinterpret_cast<void *>(&addr)));
+    MOCKER((void *(*)(void *, unsigned long, int, int, int, long))mmap).stubs().will(returnValue(reinterpret_cast<void *>(&addr)));
     ret = MapConfig(fd, len, prot, flags);
     EXPECT_EQ(&addr, ret);
 }
