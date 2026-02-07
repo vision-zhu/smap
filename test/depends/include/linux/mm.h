@@ -37,6 +37,8 @@ static inline int page_mapcount(struct page *page)
 #define NODES_MASK		((1UL << NODES_WIDTH) - 1)
 
 pte_t *drivers__pte_offset_map(pmd_t *pmd, unsigned long addr, pmd_t *pmdvalp_);
+
+struct vm_area_struct;
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,6 +50,7 @@ unsigned long page_to_pfn(struct page *page);
 bool __folio_test_movable(struct folio *folio);
 void folio_put(struct folio *folio);
 bool PageAnon(struct page *page);
+struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr);
 
 #ifdef __cplusplus
 }
@@ -137,14 +140,6 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
 } while (0)
 
 struct vma_iterator;
-
-static inline struct vm_area_struct *find_vma(struct mm_struct *mm,
-					      unsigned long addr)
-{
-	(void)mm;
-	(void)addr;
-	return NULL;
-}
 
 #if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 static inline spinlock_t *pte_lockptr(struct mm_struct *mm, pmd_t *pmd)
