@@ -138,6 +138,14 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
 
 struct vma_iterator;
 
+static inline struct vm_area_struct *find_vma(struct mm_struct *mm,
+					      unsigned long addr)
+{
+	(void)mm;
+	(void)addr;
+	return NULL;
+}
+
 #if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 static inline spinlock_t *pte_lockptr(struct mm_struct *mm, pmd_t *pmd)
 {
@@ -185,12 +193,8 @@ static inline unsigned long folio_pfn(struct folio *folio)
 
 static inline struct folio *pfn_folio(unsigned long pfn)
 {
-    struct folio *stubFolio;
-    if (!pfn) {
-        return NULL;
-    }
-    stubFolio = (struct folio*)malloc(sizeof(*stubFolio));
-    return stubFolio;
+	static struct folio stub_folio;
+	return pfn ? &stub_folio : NULL;
 }
 
 #else
@@ -205,6 +209,17 @@ static inline struct vm_area_struct *vma_next(struct vma_iterator *vmi)
 {
 	(void)vmi;
 	return NULL;
+}
+
+static inline int folio_nid(const struct folio *folio)
+{
+	return page_to_nid(&folio->page);
+}
+
+static inline struct folio *pfn_folio(unsigned long pfn)
+{
+	static struct folio stub_folio;
+	return pfn ? &stub_folio : NULL;
 }
 #endif /* LINUX_VERSION_CODE */
 
