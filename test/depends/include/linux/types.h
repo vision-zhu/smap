@@ -33,7 +33,8 @@ typedef __kernel_key_t		key_t;
 typedef __kernel_daddr_t	daddr_t;
 typedef __kernel_pid_t		pid_t;
 typedef __kernel_off_t		off_t;
-typedef u32			nlink_t;
+/* nlink_t must match libc's definition in user-space builds. */
+typedef __kernel_ulong_t		nlink_t;
 
 typedef unsigned int  gfp_t;
 typedef unsigned long		uintptr_t;
