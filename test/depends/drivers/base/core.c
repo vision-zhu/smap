@@ -5,6 +5,7 @@
 */
 
 #include <linux/device.h>
+#include <string.h>
 
 #define MEM_SIZE 0x10000000000
 
