@@ -71,23 +71,11 @@ typedef void *fl_owner_t;
 
 #define fput(x)
 
-static inline struct file *filp_open(const char *filename, int flags, umode_t mode)
-{
-    (void)filename;
-    (void)flags;
-    (void)mode;
-    return (struct file *)ERR_PTR(-ENOENT);
-}
-
-static inline void filp_close(struct file *filp, fl_owner_t id)
-{
-    (void)filp;
-    (void)id;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+extern struct file *filp_open(const char *filename, int flags, umode_t mode);
+extern int filp_close(struct file *filp, fl_owner_t id);
 extern int alloc_chrdev_region(dev_t *, unsigned, unsigned, const char *);
 extern void unregister_chrdev_region(dev_t, unsigned);
 extern ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos);

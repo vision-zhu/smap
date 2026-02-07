@@ -13,6 +13,12 @@
 
 #define KMOD_PATH_LEN 256
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern int call_usermodehelper(const char *path, char **argv, char **envp, int wait);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LINUX_KMOD_H__ */
