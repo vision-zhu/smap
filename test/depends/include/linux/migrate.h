@@ -15,6 +15,11 @@ extern "C" {
 struct folio *alloc_migration_target(struct folio *src, unsigned long private_);
 typedef struct folio *new_folio_t(struct folio *folio, unsigned long private_);
 typedef void free_folio_t(struct folio *folio, unsigned long private_);
+
+/* Compatibility typedefs for code/tests still using page-based hooks. */
+typedef struct page *new_page_t(struct page *page, unsigned long private_);
+typedef void free_page_t(struct page *page, unsigned long private_);
+
 extern int isolate_and_migrate_folios(struct folio **folios, unsigned int nr_folios,
         new_folio_t get_new_folio, free_folio_t put_new_folio,
         unsigned long private_, enum migrate_mode mode,
