@@ -8,6 +8,7 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/list.h>
+#include <linux/string.h>
 #include <linux/errno.h>
 #include <linux/ioport.h>
 #include <linux/slab.h>

@@ -31,5 +31,7 @@ enum {
 };
 
 extern struct resource iomem_resource;
+extern int walk_iomem_res_desc(unsigned long desc, unsigned long flags, u64 start,
+                u64 end, void *arg, int (*func)(struct resource *, void *));
 
 #endif
