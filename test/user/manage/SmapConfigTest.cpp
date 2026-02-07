@@ -645,7 +645,7 @@ TEST_F(SmapConfigTest, TestRecoverProcessConfigTwo)
 
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
     MOCKER(JumpToProcessPayload).stubs().will(returnValue((char *)payload));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
     ret = RecoverProcessConfig((char *)&header);
     EXPECT_EQ(-ENOMEM, ret);
     ASSERT_EQ(nullptr, manager.processes);
