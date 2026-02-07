@@ -5,6 +5,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "securec.h"
 
 errno_t memcpy_s(void *dest, size_t numberOfElements, const void *src, size_t count)
