@@ -3,12 +3,12 @@
 #ifndef TEST_BUS_H
 #define TEST_BUS_H
 
-#include <linux/device.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+struct device;
+struct device_driver;
 
 struct bus_type {
     const char *name;

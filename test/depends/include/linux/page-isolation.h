@@ -34,6 +34,13 @@ static inline bool has_isolate_pageblock(struct zone *zone)
     return false;
 }
 
+static inline int isolate_movable_page(struct page *page, int mode)
+{
+    (void)page;
+    (void)mode;
+    return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif

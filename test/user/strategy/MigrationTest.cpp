@@ -350,7 +350,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationEmptyProcesses)
     int change = 0;
     struct ProcessManager manager = { .processes = nullptr };
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     MOCKER(CleanStrategyAttribute).stubs().will(returnValue(0));
     MOCKER(BuildAllPidData).stubs().will(returnValue(0));
     ret = PerformMigrationPreparation(&manager);
@@ -364,7 +364,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationBuildError)
     ProcessAttr process;
     struct ProcessManager manager = { .processes = &process };
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     MOCKER(CleanStrategyAttribute).stubs().will(returnValue(0));
     MOCKER(BuildAllPidData).stubs().will(returnValue(-ENOMEM));
     ret = PerformMigrationPreparation(&manager);
@@ -387,7 +387,7 @@ TEST_F(MigrationTest, TestPerformMigrationPreparationRamChanged)
     int change = 1;
     struct ProcessManager manager;
 
-    MOCKER(GetRamIsChange).stubs().with(any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
+    MOCKER(GetRamIsChange).stubs().with(mockcpp::any(), outBoundP(&change, sizeof(change))).will(returnValue(0));
     ret = PerformMigrationPreparation(&manager);
     EXPECT_EQ(-EBUSY, ret);
 }
@@ -568,6 +568,32 @@ TEST_F(MigrationTest, TestNumaSwapReduce)
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(LOCAL_NUMA_BITS));
     NumaSwapReduce(&attr.strategyAttr, numaMemSwap);
     EXPECT_EQ(100, attr.strategyAttr.nrMigratePages[1][0]);
+    free(numaMemSwap);
+}
+
+TEST_F(MigrationTest, TestNumaSwapReduceMultipleNodesTotalTransfer)
+{
+    ProcessAttr attr = {};
+    int32_t* numaMemSwap = (int32_t*)calloc((LOCAL_NUMA_BITS + REMOTE_NUMA_BITS), sizeof(int32_t));
+    ASSERT_NE(nullptr, numaMemSwap);
+
+    // total mig-in = 200
+    numaMemSwap[0] = 100;
+    numaMemSwap[2] = 100;
+    // total mig-out = 200
+    numaMemSwap[1] = -50;
+    numaMemSwap[3] = -150;
+
+    MOCKER(GetNrLocalNuma).stubs().will(returnValue(LOCAL_NUMA_BITS));
+    NumaSwapReduce(&attr.strategyAttr, numaMemSwap);
+
+    uint64_t total = 0;
+    for (int from = 0; from < MAX_NODES; from++) {
+        for (int to = 0; to < MAX_NODES; to++) {
+            total += attr.strategyAttr.nrMigratePages[from][to];
+        }
+    }
+    EXPECT_EQ(200, total);
     free(numaMemSwap);
 }
 

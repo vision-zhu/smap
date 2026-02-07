@@ -19,6 +19,7 @@
 #include <linux/wait.h>
 #include <linux/minmax.h>
 #include <linux/uaccess.h>
+#include <linux/string.h>
 
 #include "ub_hist.h"
 

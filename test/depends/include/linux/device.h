@@ -25,6 +25,10 @@ extern "C" {
 
 #define KBUILD_MODNAME "tracking_bus"
 
+struct resource;
+struct device_driver;
+struct bus_type;
+
 struct device {
     struct kobject kobj;
     struct device *parent;

@@ -66,6 +66,16 @@ struct delayed_work {
 	int cpu;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+bool cancel_delayed_work_sync(struct delayed_work *dwork);
+bool queue_delayed_work(struct workqueue_struct *wq, struct delayed_work *dwork, unsigned long delay);
+void destroy_workqueue(struct workqueue_struct *wq);
+#ifdef __cplusplus
+}
+#endif
+
 static inline struct delayed_work *to_delayed_work(struct work_struct *work)
 {
     return container_of(work, struct delayed_work, work);

@@ -12,6 +12,7 @@
 #include <linux/cpuset.h>
 #include <linux/slab.h>
 #include <linux/mm.h>
+#include <linux/vmalloc.h>
 #include <linux/umh.h>
 #include <linux/nodemask.h>
 #include <linux/rwlock.h>

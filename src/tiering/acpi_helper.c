@@ -5,6 +5,7 @@
  */
 
 #include "acpi_helper.h"
+#include <linux/string.h>
 
 #undef pr_fmt
 #define pr_fmt(fmt) "SMAP_ACPI_helper: " fmt

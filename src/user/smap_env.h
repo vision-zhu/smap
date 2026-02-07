@@ -57,6 +57,7 @@
 #define CAT_SCRIPT_TAIL "2>&1"
 
 #ifdef __cplusplus
+#include <atomic>
 typedef std::atomic<int> atomic_int;
 #endif
 
@@ -119,12 +120,13 @@ static inline void EnvAtomicSet(EnvAtomic *a, int i)
 static inline int EnvAtomicCmpAndSwap(int oldValue, int newValue, EnvAtomic *a)
 {
 #ifdef __cplusplus
-    if (a->counter.compare_exchange_strong(oldValue, newValue)) {
-        return oldValue;
-    }
-    return newValue;
+    int expected = oldValue;
+    a->counter.compare_exchange_strong(expected, newValue);
+    return expected;
 #else
-    return __sync_val_compare_and_swap(&a->counter, oldValue, newValue); // C 中使用内置函数
+    int expected = oldValue;
+    atomic_compare_exchange_strong(&a->counter, &expected, newValue);
+    return expected;
 #endif
 }
 /* TIME */

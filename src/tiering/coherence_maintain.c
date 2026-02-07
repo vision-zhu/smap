@@ -7,8 +7,10 @@
 #include <linux/hugetlb.h>
 #include <linux/iopoll.h>
 #include <linux/pagewalk.h>
+#include <linux/sched/mm.h>
 #include <linux/sched.h>
 #include <linux/semaphore.h>
+#include <linux/slab.h>
 
 #include "basic.h"
 

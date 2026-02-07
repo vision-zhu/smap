@@ -54,16 +54,13 @@ TEST_F(SmapMigrateWrapperTest, PfnToBitidx)
 extern "C" struct folio *dequeue_huge_page_nodemask(struct hstate *h, gfp_t gfp_mask,
 	int nid, nodemask_t *nmask);
 
-struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid, bool is_mig_back);
-
-
 TEST_F(SmapMigrateWrapperTest, SmapAllocHugePageNode)
 {
     struct folio *new_folio = NULL;
     struct folio *old_folio = (struct folio *)kmalloc(sizeof(struct folio*), GFP_KERNEL);
     MOCKER(get_hugetlb_folio_nodemask)
         .stubs()
-        .with(any())
+        .with(mockcpp::any())
         .will(returnValue((struct folio*)NULL));
     new_folio = smap_alloc_huge_page_node(old_folio, 0, false);
     EXPECT_EQ(NULL, new_folio);

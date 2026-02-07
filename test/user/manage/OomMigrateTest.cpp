@@ -65,12 +65,12 @@ TEST_F(OomMigrateTest, TestInitMigList)
     mockProcess.strategyAttr.l3RemoteMemRatio[0][0] = 50;
 
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(-1));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(-1));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(-1, ret);
     GlobalMockObject::verify();
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     MOCKER(GetPidNrPages).stubs().will(returnValue(sumPages));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(0, ret);
@@ -93,7 +93,7 @@ TEST_F(OomMigrateTest, TestInitMigListSecond)
     mockProcess.strategyAttr.l3RemoteMemRatio[0][0] = 100;
 
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     MOCKER(GetPidNrPages).stubs().will(returnValue(sumPages));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(0, ret);
@@ -102,7 +102,7 @@ TEST_F(OomMigrateTest, TestInitMigListSecond)
     GlobalMockObject::verify();
     node = -1;
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
-    MOCKER(GetNumaNodesForPid).stubs().with(any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
+    MOCKER(GetNumaNodesForPid).stubs().with(mockcpp::any(), outBoundP(&node, sizeof(node))).will(returnValue(0));
     ret = InitMigList(&mList, &pageCount, &mockProcess);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -125,10 +125,10 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrate)
     }
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(0));
     MOCKER(GetPaddrsFromPagemap).stubs().will(returnValue(0));
-    MOCKER(close).stubs().will(ignoreReturnValue());
+    MOCKER((int (*)(int))close).stubs().will(ignoreReturnValue());
     MOCKER(AddMigList).stubs().will(returnValue(0)).then(returnValue(0));
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(0, mMsg.cnt);
@@ -142,7 +142,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateSecond)
     mList.nr = 0;
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(0, mList.nr);
@@ -157,7 +157,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateThird)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(-1));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(-1));
     MOCKER(OpenPidPagemapFile).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(1, mList.nr);
@@ -173,7 +173,7 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateForth)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(-1));
     MOCKER(GetPaddrsFromPagemap).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
@@ -190,10 +190,10 @@ TEST_F(OomMigrateTest, TestFindEnoughPageToMigrateFifth)
     uint64_t pageCount = 500;
     ProcessAttr mockProcess;
 
-    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), any(), any()).will(returnValue(0));
+    MOCKER(InitMigList).stubs().with(outBoundP(&mList, sizeof(struct MigList)), mockcpp::any(), mockcpp::any()).will(returnValue(0));
     MOCKER(OpenPidPagemapFile).stubs().will(returnValue(0));
     MOCKER(GetPaddrsFromPagemap).stubs().will(returnValue(-1));
-    MOCKER(close).stubs().will(ignoreReturnValue());
+    MOCKER((int (*)(int))close).stubs().will(ignoreReturnValue());
     MOCKER(AddMigList).expects(never());
     FindEnoughPageToMigrate(&pageCount, &mockProcess, &mMsg);
     EXPECT_EQ(1, mList.nr);
@@ -216,7 +216,7 @@ TEST_F(OomMigrateTest, TestFindPidMigrateSizeAbnormalOne)
     MOCKER(GetProcessManager).stubs().will(returnValue(&manager));
     MOCKER(InitOomMigrateMsg)
         .stubs()
-        .with(outBoundP(&mMsg, sizeof(struct MigrateMsg)), any())
+        .with(outBoundP(&mMsg, sizeof(struct MigrateMsg)), mockcpp::any())
         .will(returnValue(1));
     FindPidMigrateSize(size);
     EXPECT_EQ(1, mMsg.cnt);
@@ -272,14 +272,15 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemap)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    static char fake_line[] = "1";
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
     MOCKER(IsHugeMode).stubs().will(returnValue(false));
     MOCKER(GetPaddrFromMemRange).stubs().will(returnValue(0));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = GetPaddrsFromPagemap(&mockProcess, pagemapFd, &pageCount, &mList);
     EXPECT_EQ(0, ret);
 }
@@ -302,7 +303,7 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapSecond)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
     ret = GetPaddrsFromPagemap(&mockProcess, pagemapFd, &pageCount, &mList);
     EXPECT_EQ(-ENODEV, ret);
 }
@@ -320,15 +321,16 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapThird)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    static char fake_line[] = "1";
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
     MOCKER(IsHugeMode).stubs().will(returnValue(true));
     MOCKER(IsHugePageRange).stubs().will(returnValue(0));
 
-    MOCKER(fclose).stubs().will(returnValue(-1));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(-1));
     ret = GetPaddrsFromPagemap(&mockProcess, pagemapFd, &pageCount, &mList);
     EXPECT_EQ(-1, ret);
 }
@@ -348,14 +350,15 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapForth)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    static char fake_line[] = "1";
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
+    MOCKER(fgets).stubs().will(returnValue(&fake_line[0])).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
     MOCKER(IsHugeMode).stubs().will(returnValue(false));
     MOCKER(GetPaddrFromMemRange).stubs().will(returnValue(-1));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = GetPaddrsFromPagemap(&mockProcess, pagemapFd, &pageCount, &mList);
     EXPECT_EQ(-1, ret);
 }
@@ -369,7 +372,7 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRange)
     struct MigList mList;
     uint64_t pageCount = 10;
 
-    MOCKER(lseek).stubs().will(returnValue((off_t)-1));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue((off_t)-1));
     ret = GetPaddrFromMemRange(pagemapFd, start, end, &mList, &pageCount);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -384,8 +387,8 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRangeSecond)
     struct MigList mList;
     uint64_t pageCount = 10;
 
-    MOCKER(lseek).stubs().will(returnValue(0));
-    MOCKER(read).stubs().will(returnValue(0));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue(0));
+    MOCKER((long (*)(int, void *, unsigned long))read).stubs().will(returnValue(0));
     ret = GetPaddrFromMemRange(pagemapFd, start, end, &mList, &pageCount);
     EXPECT_EQ(-EINVAL, ret);
 }
@@ -414,8 +417,8 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRangeThird)
     struct MigList mList;
     mList.nr = 0;
     uint64_t pageCount = 10;
-    MOCKER(lseek).stubs().will(returnValue(0));
-    MOCKER(read).stubs().will(returnValue(PAGEMAP_ENTRY_SIZE));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue(0));
+    MOCKER((long (*)(int, void *, unsigned long))read).stubs().will(returnValue(PAGEMAP_ENTRY_SIZE));
     MOCKER(OomGetPaddr).stubs().will(ignoreReturnValue());
 
     ret = GetPaddrFromMemRange(pagemapFd, start, end, &mList, &pageCount);
@@ -449,7 +452,7 @@ TEST_F(OomMigrateTest, TestOpenPidPagemapFileSecond)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(open).stubs().will(returnValue(-1));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(-1));
     ret = OpenPidPagemapFile(pid, &pagemapFd);
     EXPECT_EQ(-ENODEV, ret);
 }
@@ -462,7 +465,7 @@ TEST_F(OomMigrateTest, TestOpenPidPagemapFileThird)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(open).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(0));
     ret = OpenPidPagemapFile(pid, &pagemapFd);
     EXPECT_EQ(0, ret);
 }

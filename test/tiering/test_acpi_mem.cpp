@@ -67,7 +67,7 @@ TEST_F(AcpiMemTest, CalcNodeDistance)
     MOCKER(__node_distance).stubs().with(eq(2), eq(0)).will(returnValue(14));
     MOCKER(__node_distance).stubs().with(eq(2), eq(1)).will(returnValue(24));
     MOCKER(__node_distance).stubs().with(eq(2), eq(2)).will(returnValue(10));
-    MOCKER(__node_distance).stubs().with(any(), any()).will(returnValue(100));
+    MOCKER(__node_distance).stubs().with(mockcpp::any(), mockcpp::any()).will(returnValue(100));
     acpi_mem_cached[0].online = acpi_mem_cached[2].online = true;
     acpi_mem_cached[1].online = false;
     for (i = 0; i < 4; i++) {
@@ -128,7 +128,7 @@ TEST_F(AcpiMemTest, FindClosestNode)
     MOCKER(node_state).stubs().with(1, N_CPU).will(returnValue(1));
     MOCKER(node_state).stubs().with(2, N_CPU).will(returnValue(1));
     MOCKER(node_state).stubs().with(3, N_CPU).will(returnValue(1));
-    MOCKER(node_state).stubs().with(any(), N_CPU).will(returnValue(1));
+    MOCKER(node_state).stubs().with(mockcpp::any(), N_CPU).will(returnValue(1));
     ret = find_closest_node(0, &nid);
     EXPECT_EQ(0, ret);
     EXPECT_EQ(2, nid);
@@ -138,7 +138,7 @@ TEST_F(AcpiMemTest, FindClosestNode)
     MOCKER(node_state).stubs().with(1, N_CPU).will(returnValue(0));
     MOCKER(node_state).stubs().with(2, N_CPU).will(returnValue(1));
     MOCKER(node_state).stubs().with(3, N_CPU).will(returnValue(1));
-    MOCKER(node_state).stubs().with(any(), N_CPU).will(returnValue(1));
+    MOCKER(node_state).stubs().with(mockcpp::any(), N_CPU).will(returnValue(1));
     ret = find_closest_node(0, &nid);
     EXPECT_EQ(0, ret);
     EXPECT_EQ(1, nid);
@@ -196,7 +196,7 @@ TEST_F(AcpiMemTest, InitAcpiMemTwo)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -236,7 +236,7 @@ TEST_F(AcpiMemTest, InitAcpiMemThree)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -277,7 +277,7 @@ TEST_F(AcpiMemTest, InitAcpiMemFour)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -312,7 +312,7 @@ TEST_F(AcpiMemTest, InitAcpiMemFive)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -353,7 +353,7 @@ TEST_F(AcpiMemTest, InitAcpiMemSix)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -394,7 +394,7 @@ TEST_F(AcpiMemTest, InitAcpiMemSeven)
 
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(struct acpi_table_header)))
         .will(returnValue(0));
     MOCKER(acpi_parse_entries_array).stubs().with().will(returnValue(0));
     MOCKER(acpi_put_table).stubs().will(ignoreReturnValue());
@@ -420,7 +420,7 @@ TEST_F(AcpiMemTest, InitAcpiMemEight)
     acpi_disabled = 0;
     MOCKER(acpi_get_table)
         .stubs()
-        .with(any(), any(), outBoundP(&table_header, sizeof(table_header)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&table_header, sizeof(table_header)))
         .will(ignoreReturnValue());
     MOCKER(acpi_parse_entries_array).stubs().will(returnValue(0));
     if (!list_empty(&acpi_mem.mem)) {

@@ -180,7 +180,7 @@ TEST_F(AccessedBitTest, GetPidFromTrackingFile)
     file.f_path.dentry = &tempDentry;
     dparent.d_name.name = "123_t";
     tempDentry.d_parent = &tempDentry;
-    MOCKER(strncpy).stubs().will(ignoreReturnValue());
+    MOCKER((char *(*)(char *, const char *, unsigned long))strncpy).stubs().will(ignoreReturnValue());
     MOCKER(kstrtoint).stubs().will(returnValue(-1));
     int ret = get_pid_from_tracking_file(&file);
     EXPECT_EQ(-1, ret);

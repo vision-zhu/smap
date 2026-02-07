@@ -2,14 +2,19 @@
 #ifndef _DEVICE_PRINTK_H_
 #define _DEVICE_PRINTK_H_
 
-#include <linux/device.h>
+struct device;
 
 #ifndef dev_fmt
 #define dev_fmt(fmt) fmt
 #endif
 
 static inline void dev_printk(const char *level, const struct device *dev,
-                const char *fmt, ...) {}
+			      const char *fmt, ...)
+{
+	(void)level;
+	(void)dev;
+	(void)fmt;
+}
 
 static inline void _dev_err(const struct device *dev, const char *fmt, ...) {}
 static inline void _dev_info(const struct device *dev, const char *fmt, ...) {}
@@ -19,6 +24,8 @@ static inline void _dev_info(const struct device *dev, const char *fmt, ...) {}
 #define dev_info(dev, fmt, ...)						\
 	_dev_info(dev, dev_fmt(fmt), ##__VA_ARGS__)
 #define dev_dbg(dev, fmt, ...)						\
-	dev_printk(dev, dev_fmt(fmt), ##__VA_ARGS__)
+	do {								\
+		(void)(dev);						\
+	} while (0)
 
 #endif /* _DEVICE_PRINTK_H_ */

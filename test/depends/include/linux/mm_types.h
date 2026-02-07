@@ -27,7 +27,13 @@ struct page {
 };
 
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
+/*
+ * Minimal folio definition for dt unit tests.
+ *
+ * The upstream kernel exposes folios across multiple versions; however, in this
+ * user-space DT harness we must ensure `struct folio` is always a complete
+ * type regardless of the host system's `<linux/version.h>`.
+ */
 struct folio {
     union {
         struct {
@@ -45,6 +51,7 @@ struct folio {
     };
 };
 
+#if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 struct vma_iterator {
 	struct ma_state mas;
 };

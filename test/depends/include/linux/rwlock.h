@@ -9,6 +9,8 @@
 
 #include <linux/rwlock_types.h>
 
+#define DEFINE_RWLOCK(lockname) rwlock_t lockname
+
 #define write_lock(lock)
 #define write_unlock(lock)
 #define read_lock(lock)

@@ -12,7 +12,6 @@
 #include <asm/mmzone.h>
 #include <asm/page.h>
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 enum migratetype {
     MIGRATE_UNMOVABLE,
     MIGRATE_MOVABLE,
@@ -25,8 +24,6 @@ enum migratetype {
 };
 #define folio_migratetype(folio) -1
 #define folio_test_hwpoison(folio) false
-
-#endif /* LINUX_VERSION_CODE */
 
 #define MIGRATETYPE_MASK ((1UL << PB_migratetype_bits) - 1)
 

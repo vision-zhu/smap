@@ -7,6 +7,8 @@
 #ifndef TEST_IDR_H
 #define TEST_IDR_H
 
+#include <linux/gfp.h>
+
 struct ida {
 };
 
@@ -14,6 +16,7 @@ struct ida {
 #define DEFINE_IDA(name)	struct ida name = IDA_INIT(name)
 
 void ida_free(struct ida *, unsigned int id);
+int ida_alloc_range(struct ida *ida, unsigned int min, unsigned int max, gfp_t gfp);
 
 #define ida_simple_get(ida, start, end, gfp)	\
 			ida_alloc_range(ida, start, (end) - 1, gfp)

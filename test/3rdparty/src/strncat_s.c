@@ -5,6 +5,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "securec.h"
 
 int strncat_s(char *strDest, size_t destMax, const char *strSrc, size_t count)

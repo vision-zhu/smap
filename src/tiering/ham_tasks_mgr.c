@@ -4,6 +4,7 @@
 
 #include <linux/slab.h>
 #include <linux/mm.h>
+#include <linux/vmalloc.h>
 #include <linux/rwlock.h>
 #include <linux/rwlock_types.h>
 #include <linux/hugetlb.h>

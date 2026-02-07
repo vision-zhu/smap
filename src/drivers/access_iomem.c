@@ -13,6 +13,7 @@
 #include <linux/mmzone.h>
 #include <linux/memory.h>
 #include <linux/spinlock.h>
+#include <linux/rwlock.h>
 
 #include "check.h"
 #include "access_tracking.h"

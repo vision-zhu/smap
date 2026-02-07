@@ -10,9 +10,17 @@
 
 #include <asm/byteorder.h>
 
-#define readl(c) (c)
-#define writel(v, c) (c)
-#define iounmap(addr) (addr)
-#define ioremap(addr, size) (addr)
+#define readl(c)                 \
+	(0U + (unsigned int)0 * (unsigned long)(c))
+#define writel(v, c)             \
+	do {                     \
+		(void)(v);        \
+		(void)(c);        \
+	} while (0)
+#define iounmap(addr)                 \
+	do {                          \
+		(void)(addr);         \
+	} while (0)
+#define ioremap(addr, size) ((void *)(unsigned long)(addr))
 
 #endif	/* __ASM_IO_H */

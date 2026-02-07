@@ -41,7 +41,7 @@ TEST_F(VirtTest, TestExtractIdFromCmdline)
     int id;
     MOCKER((int (*)(char const *, char const *, void *))sscanf_s)
         .stubs()
-        .with(any(), any(), outBoundP((void*)&mockId, sizeof(int)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP((void*)&mockId, sizeof(int)))
         .will(returnValue(3));
     ret = ExtractIdFromCmdline(cmdline, sizeof(cmdline), &id);
     EXPECT_EQ(0, ret);
@@ -146,7 +146,7 @@ TEST_F(VirtTest, TestCloseVirHandler)
 {
     virConnect conn;
     g_virtHandler = &conn;
-    MOCKER(dlclose).expects(once()).will(returnValue(0));
+    MOCKER((int (*)(void *))dlclose).expects(once()).will(returnValue(0));
     CloseVirHandler();
     EXPECT_EQ(nullptr, g_virtHandler);
 }
@@ -156,7 +156,7 @@ TEST_F(VirtTest, TestOpenVirHandler)
     int ret;
     virConnect conn;
     g_virtHandler = &conn;
-    MOCKER(dlopen).expects(never());
+    MOCKER((void *(*)(const char *, int))dlopen).expects(never());
     ret = OpenVirHandler();
     EXPECT_EQ(0, ret);
     g_virtHandler = nullptr;
@@ -165,14 +165,14 @@ TEST_F(VirtTest, TestOpenVirHandler)
 TEST_F(VirtTest, TestOpenVirHandlerTwo)
 {
     g_virtHandler = nullptr;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(nullptr)));
     int ret = OpenVirHandler();
     EXPECT_EQ(-ENOENT, ret);
 
     GlobalMockObject::verify();
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(nullptr)));
     ret = OpenVirHandler();
     EXPECT_EQ(-ENOENT, ret);
     g_virtHandler = nullptr;
@@ -181,8 +181,8 @@ TEST_F(VirtTest, TestOpenVirHandlerTwo)
 TEST_F(VirtTest, TestOpenVirHandlerThree)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn))).then(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn))).then(returnValue(static_cast<void *>(nullptr)));
     int ret = OpenVirHandler();
     EXPECT_EQ(-ENOENT, ret);
     g_virtHandler = nullptr;
@@ -191,8 +191,8 @@ TEST_F(VirtTest, TestOpenVirHandlerThree)
 TEST_F(VirtTest, TestOpenVirHandlerFour)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn)));
     int ret = OpenVirHandler();
     EXPECT_EQ(0, ret);
     g_virtHandler = nullptr;
@@ -201,8 +201,8 @@ TEST_F(VirtTest, TestOpenVirHandlerFour)
 TEST_F(VirtTest, TestOpenVirHandlerFive)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(nullptr)));
     int ret = OpenVirHandler();
@@ -213,8 +213,8 @@ TEST_F(VirtTest, TestOpenVirHandlerFive)
 TEST_F(VirtTest, TestOpenVirHandlerSix)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(nullptr)));
@@ -226,8 +226,8 @@ TEST_F(VirtTest, TestOpenVirHandlerSix)
 TEST_F(VirtTest, TestOpenVirHandlerSeven)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
@@ -240,8 +240,8 @@ TEST_F(VirtTest, TestOpenVirHandlerSeven)
 TEST_F(VirtTest, TestOpenVirHandlerEight)
 {
     virConnect conn;
-    MOCKER(dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
-    MOCKER(dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
+    MOCKER((void *(*)(const char *, int))dlopen).stubs().will(returnValue(static_cast<void *>(&conn)));
+    MOCKER((void *(*)(void *, const char *))dlsym).stubs().will(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))
                          .then(returnValue(static_cast<void *>(&conn)))

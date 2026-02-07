@@ -1010,7 +1010,7 @@ TEST_F(SeparateStrategyTest, TestSeparateStrategyMultiNumaVm)
     }
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(4));
     MOCKER(InitSeparateParam).stubs().will(ignoreReturnValue());
-    MOCKER(CalculateMigInfo).stubs().with(any(), any(), any(), outBoundP(&demoteNum, sizeof(demoteNum)),
+    MOCKER(CalculateMigInfo).stubs().with(mockcpp::any(), mockcpp::any(), mockcpp::any(), outBoundP(&demoteNum, sizeof(demoteNum)),
          outBoundP(&promoteNum, sizeof(promoteNum)))
          .will(ignoreReturnValue());
     MOCKER(DemoteMultiNumaVmStrategy).stubs().will(returnValue(1));
@@ -1025,7 +1025,7 @@ TEST_F(SeparateStrategyTest, TestSeparateStrategyMultiNumaVm)
     }
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(4));
     MOCKER(InitSeparateParam).stubs().will(ignoreReturnValue());
-    MOCKER(CalculateMigInfo).stubs().with(any(), any(), any(), outBoundP(&demoteNum, sizeof(demoteNum)),
+    MOCKER(CalculateMigInfo).stubs().with(mockcpp::any(), mockcpp::any(), mockcpp::any(), outBoundP(&demoteNum, sizeof(demoteNum)),
          outBoundP(&promoteNum, sizeof(promoteNum)))
          .will(ignoreReturnValue());
     MOCKER(PromoteMultiNumaVmStrategy).stubs().will(returnValue(2));
@@ -1049,28 +1049,28 @@ TEST_F(SeparateStrategyTest, TestSwapMultiNumaVmStrategy)
     int nrLocalNuma = 0;
 
     nrPages[0] = 1;
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
     int ret = SwapMultiNumaVmStrategy(&process, mlist, nrPages, nrLocalNuma);
     EXPECT_EQ(-ENOMEM, ret);
 
     GlobalMockObject::verify();
     nrPages[0] = 1;
     LevelActcData *levelActcData_1 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_1)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_1)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(1));
     ret = SwapMultiNumaVmStrategy(&process, mlist, nrPages, nrLocalNuma);
     EXPECT_EQ(1, ret);
 
     GlobalMockObject::verify();
     LevelActcData *levelActcData_2 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_2)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_2)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(0)).then(returnValue(2));
     ret = SwapMultiNumaVmStrategy(&process, mlist, nrPages, nrLocalNuma);
     EXPECT_EQ(2, ret);
 
     GlobalMockObject::verify();
     LevelActcData *levelActcData_3 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_3)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(levelActcData_3)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(0)).then(returnValue(0));
     MOCKER(CalcMultiNumaVmSwapNumByFreq).stubs().will(returnValue((uint64_t)0));
     ret = SwapMultiNumaVmStrategy(&process, mlist, nrPages, nrLocalNuma);
@@ -1080,7 +1080,7 @@ TEST_F(SeparateStrategyTest, TestSwapMultiNumaVmStrategy)
     nrPages[1] = 1;
     LevelActcData *levelActcData_4 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
     LevelActcData *levelActcData_5 = (LevelActcData *)calloc(nrPages[1], sizeof(LevelActcData));
-    MOCKER(calloc).stubs()
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs()
         .will(returnValue(static_cast<void *>(levelActcData_4)))
         .then(returnValue(static_cast<void *>(levelActcData_5)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(0)).then(returnValue(0));
@@ -1092,7 +1092,7 @@ TEST_F(SeparateStrategyTest, TestSwapMultiNumaVmStrategy)
     GlobalMockObject::verify();
     LevelActcData *levelActcData_6 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
     LevelActcData *levelActcData_7 = (LevelActcData *)calloc(nrPages[1], sizeof(LevelActcData));
-    MOCKER(calloc).stubs()
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs()
         .will(returnValue(static_cast<void *>(levelActcData_6)))
         .then(returnValue(static_cast<void *>(levelActcData_7)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(0)).then(returnValue(0));
@@ -1105,7 +1105,7 @@ TEST_F(SeparateStrategyTest, TestSwapMultiNumaVmStrategy)
     GlobalMockObject::verify();
     LevelActcData *levelActcData_8 = (LevelActcData *)calloc(nrPages[0], sizeof(LevelActcData));
     LevelActcData *levelActcData_9 = (LevelActcData *)calloc(nrPages[1], sizeof(LevelActcData));
-    MOCKER(calloc).stubs()
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs()
         .will(returnValue(static_cast<void *>(levelActcData_8)))
         .then(returnValue(static_cast<void *>(levelActcData_9)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(0)).then(returnValue(0));
@@ -1129,7 +1129,7 @@ TEST_F(SeparateStrategyTest, TestDemoteMultiNumaVmStrategy)
     uint64_t l1ActcLen = 0;
 
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(4));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
     int ret = DemoteMultiNumaVmStrategy(&process, mlist, remoteMigInfo, nrPages, demoteNum);
     EXPECT_EQ(-ENOMEM, ret);
 
@@ -1137,7 +1137,7 @@ TEST_F(SeparateStrategyTest, TestDemoteMultiNumaVmStrategy)
     nrPages[L1] = 1;
     LevelActcData *l1ActcData_1 = (LevelActcData *)calloc(nrPages[L1], sizeof(LevelActcData));
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(4));
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(l1ActcData_1)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(l1ActcData_1)));
     MOCKER(BuildLevelActcData).stubs().will(returnValue(1));
     ret = DemoteMultiNumaVmStrategy(&process, mlist, remoteMigInfo, nrPages, demoteNum);
     EXPECT_EQ(1, ret);
@@ -1151,11 +1151,11 @@ TEST_F(SeparateStrategyTest, TestDemoteMultiNumaVmStrategy)
     l1ActcData_2[0].node = 0;
 
     MOCKER(GetNrLocalNuma).stubs().will(returnValue(4));
-    MOCKER(calloc).stubs()
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs()
         .will(returnValue(static_cast<void *>(l1ActcData_2)))
         .then(returnValue(static_cast<void *>(migAddrArray)));
     MOCKER(BuildLevelActcData).stubs()
-        .with(any(), any(), any(), outBoundP(&l1ActcLen, sizeof(uint64_t)))
+        .with(mockcpp::any(), mockcpp::any(), mockcpp::any(), outBoundP(&l1ActcLen, sizeof(uint64_t)))
         .will(returnValue(0));
     MOCKER(BuildDemoteMultiNumaMigLists).stubs().will(returnValue(0));
     ret = DemoteMultiNumaVmStrategy(&process, mlist, remoteMigInfo, nrPages, demoteNum);

@@ -5,6 +5,7 @@
 
 #include "basic.h"
 #include <linux/mm.h>
+#include <linux/sched/mm.h>
 
 #undef pr_fmt
 #define pr_fmt(fmt) "HAM: " fmt

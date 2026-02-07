@@ -373,8 +373,8 @@ extern "C" int32_t EnsureDirectoryExists(const char *dirPath);
 TEST_F(PeriodConfigTest, TestEnsureDirectoryExists)
 {
     const char* dir = "/home/test";
-    MOCKER(stat).stubs().will(returnValue(1));
-    MOCKER(mkdir).stubs().will(returnValue(1));
+    MOCKER((int (*)(const char *, struct stat *))stat).stubs().will(returnValue(1));
+    MOCKER((int (*)(const char *, unsigned int))mkdir).stubs().will(returnValue(1));
     int32_t ret = EnsureDirectoryExists(dir);
 
     EXPECT_EQ(-1, ret);

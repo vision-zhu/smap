@@ -575,7 +575,7 @@ static void IoctlMigrateE2ETestMock(struct migrate_msg *msg, unsigned int pageSi
         MOCKER(is_filter_4k).stubs().will(returnValue(-1));
         for (int i = 0; i < msg->cnt; ++i) {
             MOCKER(smap_check_huge_page_for_migration).stubs()
-                .with(any(), eq(msg->mig_list[i].pid))
+                .with(mockcpp::any(), eq(msg->mig_list[i].pid))
                 .will(repeat(0, mockCanMig2MPageNrEachMigList))
                 .then(returnValue(1));
         }
@@ -585,16 +585,16 @@ static void IoctlMigrateE2ETestMock(struct migrate_msg *msg, unsigned int pageSi
     struct mig_list *migList = msg->mig_list;
     struct page page = {0};
     MOCKER(copy_from_user).stubs()
-        .with(outBoundP(static_cast<void*>(msg), sizeof(struct migrate_msg*)))
+        .with(outBoundP(static_cast<void*>(msg), sizeof(struct migrate_msg)))
         .will(returnValue(0UL));
     MOCKER(build_migrate_list).stubs()
-        .with(any(), outBoundP(static_cast<struct mig_list**>(&migList), sizeof(struct mig_list**)))
+        .with(mockcpp::any(), outBoundP(static_cast<struct mig_list**>(&migList), sizeof(struct mig_list**)))
         .will(returnValue(0));
     MOCKER(pfn_to_online_page).stubs().will(returnValue(&page));
     MOCKER(IS_ERR).stubs().will(returnValue(false));
     MOCKER(isolate_and_migrate_folios).stubs()
-        .with(any(), any(), any(), any(), any(), any(),
-             outBoundP(static_cast<unsigned int*>(&mockSuccessMig4KPageNrEachMigList), sizeof(unsigned int*)))
+        .with(mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(), mockcpp::any(),
+             outBoundP(static_cast<unsigned int*>(&mockSuccessMig4KPageNrEachMigList), sizeof(unsigned int)))
         .will(returnValue(0));
     MOCKER(free_migrate_list_addr).stubs().will(ignoreReturnValue());
     MOCKER(free_migrate_list).stubs().will(ignoreReturnValue());
@@ -606,10 +606,10 @@ TEST_F(MigInitTest, __IoctlMigrateE2ETest)
     struct mig_list *migList;
     int ret;
     int cnt = 2;
-    void *argp;
-    struct migrate_msg msg;
-    EXPECT_NE(nullptr, migList);
+    void *argp = nullptr;
+    struct migrate_msg msg = { 0 };
     migList = (struct mig_list*)vzalloc(cnt * sizeof(struct mig_list));
+    EXPECT_NE(nullptr, migList);
     u64 startAddr = 0x100000000;
     int addCnt = 0;
     for (int i = 0; i < cnt; ++i) {
@@ -628,6 +628,7 @@ TEST_F(MigInitTest, __IoctlMigrateE2ETest)
     msg.mig_list = migList;
     msg.mul_mig.page_size = TWO_MEGA_SIZE;
     msg.mul_mig.is_mul_thread = false;
+    argp = &msg;
 
     // 10 huge page can migrate, 5120 page migrate success
     IoctlMigrateE2ETestMock(&msg, HUGE_PAGE, 5120, 10);

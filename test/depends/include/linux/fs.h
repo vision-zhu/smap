@@ -11,6 +11,7 @@
 #include <linux/rwsem.h>
 #include <linux/sysfs.h>
 #include <linux/err.h>
+#include <linux/export.h>
 #include <stdlib.h>
 #include <linux/kdev_t.h>
 #include <linux/uaccess.h>
@@ -44,6 +45,9 @@ struct file {
 	struct inode *f_inode;	/* cached value */
 };
 
+struct kiocb;
+struct iov_iter;
+
 struct file_operations {
 	long (*unlocked_ioctl) (struct file *f, unsigned int cmd, unsigned long arg);
 	int (*release) (struct inode *i, struct file *f);
@@ -73,6 +77,8 @@ typedef void *fl_owner_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
+extern struct file *filp_open(const char *filename, int flags, umode_t mode);
+extern int filp_close(struct file *filp, fl_owner_t id);
 extern int alloc_chrdev_region(dev_t *, unsigned, unsigned, const char *);
 extern void unregister_chrdev_region(dev_t, unsigned);
 extern ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos);

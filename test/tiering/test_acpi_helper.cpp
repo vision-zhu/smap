@@ -150,10 +150,10 @@ TEST_F(AcpiHelperTest, AcpiParseEntriesArray)
     MOCKER(acpi_get_subtable_type).stubs().with(id2).will(returnValue(SUBTABLE_HMAT));
     MOCKER(acpi_get_subtable_type).stubs().with(id1).will(returnValue(SUBTABLE_COMMON));
 
-    MOCKER(acpi_get_subtable_header_length).stubs().with(any()).will(returnValue(static_cast<unsigned long>(2)));
-    MOCKER(acpi_get_entry_type).stubs().with(any()).will(returnValue(static_cast<unsigned long>(2)));
+    MOCKER(acpi_get_subtable_header_length).stubs().with(mockcpp::any()).will(returnValue(static_cast<unsigned long>(2)));
+    MOCKER(acpi_get_entry_type).stubs().with(mockcpp::any()).will(returnValue(static_cast<unsigned long>(2)));
 
-    MOCKER(acpi_get_entry_length).defaults().with(any()).will(returnValue(static_cast<unsigned long>(0)));
+    MOCKER(acpi_get_entry_length).defaults().with(mockcpp::any()).will(returnValue(static_cast<unsigned long>(0)));
 
     int ret1 = acpi_parse_entries_array(id1, tableSize, &table_header1, proc, procNum, maxEntry1);
     EXPECT_EQ(ret1, 0);
@@ -163,7 +163,7 @@ TEST_F(AcpiHelperTest, AcpiParseEntriesArray)
     EXPECT_EQ(ret2, -EINVAL);
 
     proc[1].handler = nullptr;
-    MOCKER(acpi_get_entry_length).stubs().with(any()).will(returnValue(static_cast<unsigned long>(1)));
+    MOCKER(acpi_get_entry_length).stubs().with(mockcpp::any()).will(returnValue(static_cast<unsigned long>(1)));
     int ret3 = acpi_parse_entries_array(id1, tableSize, &table_header2, proc, procNum, maxEntry2);
     EXPECT_EQ(ret3, -EINVAL);
 }

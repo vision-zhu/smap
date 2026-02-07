@@ -94,7 +94,7 @@ TEST_F(ManageTest, TestPidIsValid)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(access).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(0));
     ret = PidIsValid(1);
     EXPECT_EQ(ret, true);
     GlobalMockObject::verify();
@@ -124,7 +124,7 @@ TEST_F(ManageTest, TestIsQemuTaskPath)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(static_cast<FILE *>(nullptr)));
     ret = IsQemuTask(1);
     EXPECT_EQ(-1, ret);
 }
@@ -137,9 +137,9 @@ TEST_F(ManageTest, TestIsQemuTaskFile)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     MOCKER(fgets).stubs().will(returnValue(static_cast<char *>(nullptr)));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = IsQemuTask(1);
     EXPECT_EQ(-1, ret);
 
@@ -147,10 +147,10 @@ TEST_F(ManageTest, TestIsQemuTaskFile)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     char buf[] = "1";
     MOCKER(fgets).stubs().will(returnValue(&buf[0]));
-    MOCKER(fclose).stubs().will(returnValue(0));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(0));
     ret = IsQemuTask(1);
     EXPECT_EQ(0, ret);
 }
@@ -403,7 +403,7 @@ extern "C" FILE* OpenNumaMaps(pid_t pid);
 TEST_F(ManageTest, TestOpenNumaMaps)
 {
     int pid = 1;
-    MOCKER(fopen).stubs().will(returnValue(reinterpret_cast<FILE*>(0x1234)));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(reinterpret_cast<FILE*>(0x1234)));
 
     FILE* ret = OpenNumaMaps(pid);
     EXPECT_NE(ret, nullptr);
@@ -684,7 +684,56 @@ TEST_F(ManageTest, TestQueryManagedProcess)
     g_processManager.processes = &mockProcess;
     ret = QueryManagedProcess(PROCESS_TYPE);
     EXPECT_NE(ret, static_cast<pid_t *>(nullptr));
+    EXPECT_EQ(123, ret[0]);
+    EXPECT_EQ(PROCESS_TYPE, mockProcess.type);
     free(ret);
+}
+
+TEST_F(ManageTest, TestQueryManagedProcessShouldNotMutateOtherType)
+{
+    pid_t *ret;
+    ProcessAttr vm = {};
+    ProcessAttr proc = {};
+    proc.pid = 111;
+    proc.type = PROCESS_TYPE;
+    vm.pid = 222;
+    vm.type = VM_TYPE;
+    proc.next = &vm;
+    vm.next = nullptr;
+
+    g_processManager.processes = &proc;
+    /*
+     * Intentionally over-estimate nr[PROCESS_TYPE] to ensure the returned array
+     * has enough capacity even if a bug wrongly treats other types as matched.
+     */
+    g_processManager.nr[PROCESS_TYPE] = 2;
+    ret = QueryManagedProcess(PROCESS_TYPE);
+    EXPECT_NE(ret, static_cast<pid_t *>(nullptr));
+    EXPECT_EQ(VM_TYPE, vm.type);
+    free(ret);
+
+    g_processManager.processes = nullptr;
+    g_processManager.nr[PROCESS_TYPE] = 0;
+}
+
+TEST_F(ManageTest, TestNumaNodesBitmapSetL1PreservesL2)
+{
+    uint32_t nodes = 0;
+    SetL2(&nodes, LOCAL_NUMA_BITS); // first L2 bit position
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS));
+    SetL1(&nodes, 1);
+    EXPECT_TRUE(InL1(nodes, 1));
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS));
+}
+
+TEST_F(ManageTest, TestNumaNodesBitmapSetL2PreservesL1)
+{
+    uint32_t nodes = 0;
+    AddL1(&nodes, 0);
+    EXPECT_TRUE(InL1(nodes, 0));
+    SetL2(&nodes, LOCAL_NUMA_BITS + 2);
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS + 2));
+    EXPECT_TRUE(InL1(nodes, 0));
 }
 
 extern "C" int DestroyProcessManager();
@@ -757,7 +806,7 @@ TEST_F(ManageTest, TestInitPidActcData)
     ret = InitPidActcData(attr);
     EXPECT_EQ(0, ret);
 
-    MOCKER(calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
+    MOCKER((void *(*)(unsigned long, unsigned long))calloc).stubs().will(returnValue(static_cast<void *>(nullptr)));
     ret = InitPidActcData(attr);
     EXPECT_EQ(-ENOMEM, ret);
     free(attr);
@@ -785,10 +834,10 @@ TEST_F(ManageTest, TestProcessSmapsFile)
     unsigned long ret = ProcessSmapsFile(pid, targetLinePrefix, prefixLength, divisor);
     EXPECT_EQ(ret, 0);
     static FILE fake_file;
-    MOCKER(fopen).stubs().will(returnValue(&fake_file));
+    MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
     char buf[] = "1";
     MOCKER(fgets).stubs().will(returnValue(&buf[0])).then(returnValue((static_cast<char *>(nullptr))));
-    MOCKER(fclose).stubs().will(returnValue(1));
+    MOCKER((int (*)(FILE *))fclose).stubs().will(returnValue(1));
     MOCKER((int (*)(char const *, char const *, void *))sscanf_s)
         .stubs()
         .will(returnValue(0));
@@ -826,7 +875,7 @@ TEST_F(ManageTest, TestGetNodeFromCpu)
     int cpu = 1234;
     int ret = GetNodeFromCpu(cpu);
     EXPECT_EQ(ret, -EINVAL);
-    MOCKER(access).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(0));
     ret = GetNodeFromCpu(cpu);
     EXPECT_EQ(ret, 0);
 }
@@ -841,7 +890,7 @@ TEST_F(ManageTest, TestGetNumaNodesForPid)
     int node = 0;
     int ret = GetNumaNodesForPid(pid, &node);
     EXPECT_EQ(ret, -EINVAL);
-    MOCKER(sched_getaffinity).stubs().will(returnValue(0));
+    MOCKER((int (*)(int, unsigned long, cpu_set_t *))sched_getaffinity).stubs().will(returnValue(0));
     MOCKER(GetNodeFromCpu).stubs().will(returnValue(-EINVAL)).then(returnValue(0));
     ret = GetNumaNodesForPid(pid, &node);
     EXPECT_EQ(ret, 0);
@@ -976,7 +1025,7 @@ TEST_F(ManageTest, TestBuildAllPidData)
     struct ProcessMemBitmap pmb = { .pid = 1025, .len = { 0, 0 } };
 
     g_processManager.processes = &processes;
-    MOCKER(clock).stubs().will(returnValue(static_cast<clock_t>(0)));
+    MOCKER((clock_t (*)(void))clock).stubs().will(returnValue(static_cast<clock_t>(0)));
     MOCKER(EnvMutexLock).stubs().will(ignoreReturnValue());
     MOCKER(EnvMutexUnlock).stubs().will(ignoreReturnValue());
     MOCKER(BuildAndFillBitmapBuf).stubs().will(returnValue(-EPERM));
@@ -998,7 +1047,7 @@ TEST_F(ManageTest, TestBuildAllPidData)
         .will(returnValue(0));
     MOCKER(ParseBitmap)
         .stubs()
-        .with(any(), any(), outBoundP(&len, sizeof(len)), outBoundP(&pmb, sizeof(pmb)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&len, sizeof(len)), outBoundP(&pmb, sizeof(pmb)))
         .will(returnValue(0));
     MOCKER(SetPidNrPages).stubs().will(ignoreReturnValue());
     MOCKER(FillPidData).stubs().will(returnValue(0));

@@ -122,7 +122,7 @@ TEST_F(PidIoctlTest, SmapIoctlMigrateBack)
     ASSERT_NE(nullptr, subtask);
     MOCKER(init_migrate_back_subtask)
         .stubs()
-        .with(any(), any(), outBoundP(&subtask, sizeof(subtask)))
+        .with(mockcpp::any(), mockcpp::any(), outBoundP(&subtask, sizeof(subtask)))
         .will(returnValue(0));
     MOCKER(start_migrate_back_work).stubs().will(returnValue(-ENOENT));
     ret = smap_ioctl_migrate_back(&mb_msg);

@@ -29,6 +29,8 @@ int snprintf_s(char *strDest, unsigned long destMax, unsigned long count, const 
 
 int vsnprintf_s(char *strDest, size_t destMax, size_t count, const char *format, va_list argList);
 
+int sprintf_s(char *strDest, size_t destMax, const char *format, ...);
+
 int sscanf_s(const char *buffer, const char *format, ...);
 
 errno_t memcpy_s(void *dest, size_t numberOfElements, const void *src, size_t count);
@@ -36,6 +38,9 @@ errno_t memcpy_s(void *dest, size_t numberOfElements, const void *src, size_t co
 errno_t strncpy_s(char *strDest, size_t destMax, const char *strSrc, size_t count);
 
 errno_t strcpy_s(char *strDest, size_t destMax, const char *strSrc);
+
+errno_t strncat_s(char *strDest, size_t destMax, const char *strSrc,
+		  size_t count);
 
 #ifdef __cplusplus
 }

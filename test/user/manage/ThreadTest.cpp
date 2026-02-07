@@ -56,7 +56,9 @@ TEST_F(ThreadTest, TestInitThread)
     uint32_t period;
     int ret;
 
-    MOCKER(pthread_create).stubs().will(ignoreReturnValue());
+    MOCKER((int (*)(pthread_t *, const pthread_attr_t *, void *(*)(void *), void *))pthread_create)
+        .stubs()
+        .will(ignoreReturnValue());
     MOCKER(EnvMutexLock).stubs().will(ignoreReturnValue());
     MOCKER(EnvMutexUnlock).stubs().will(ignoreReturnValue());
     ret = InitThread(&pm, period, TmpWorkFunc);
@@ -73,7 +75,7 @@ TEST_F(ThreadTest, TestDestroyAllThread)
     pm.threadCtx[1] = malloc(sizeof(ThreadCtx));
     ASSERT_NE(nullptr, pm.threadCtx[0]);
     ASSERT_NE(nullptr, pm.threadCtx[1]);
-    MOCKER(pthread_join).expects(exactly(2)).will(ignoreReturnValue());
+    MOCKER((int (*)(pthread_t, void **))pthread_join).expects(exactly(2)).will(ignoreReturnValue());
     MOCKER(EnvMutexLock).stubs().will(ignoreReturnValue());
     MOCKER(EnvMutexUnlock).stubs().will(ignoreReturnValue());
     ret = DestroyAllThread(&pm);

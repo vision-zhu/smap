@@ -5,6 +5,7 @@
  */
 
 #include <linux/nodemask.h>
+#include <linux/jump_label.h>
 #include <linux/kprobes.h>
 
 #include "smap_migrate_wrapper.h"

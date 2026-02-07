@@ -353,7 +353,7 @@ TEST_F(IomemTest, extract_hex_content_dt)
 
     MOCKER(filp_open).stubs().will(returnValue((struct file *)&filp));
     MOCKER(IS_ERR).stubs().will(returnValue(false));
-    MOCKER(kernel_read).stubs().with(any(), outBoundP((void *)buf, sizeof(buf)), any(), any()).will(returnValue(5));
+    MOCKER(kernel_read).stubs().with(mockcpp::any(), outBoundP((void *)buf, sizeof(buf)), mockcpp::any(), mockcpp::any()).will(returnValue(5));
     MOCKER(filp_close).stubs().will(ignoreReturnValue());
     int ret = extract_hex_content("size", &content);
     EXPECT_EQ(0, ret);

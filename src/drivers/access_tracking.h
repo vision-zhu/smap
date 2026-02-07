@@ -45,6 +45,15 @@ enum hist_status {
 extern struct list_head access_dev;
 extern u8 access_page_size;
 
+#ifdef USE_DT
+/* DT harness rewrites some access_iomem symbols with a drivers_ prefix. */
+void drivers_release_remote_ram(void);
+#define release_remote_ram drivers_release_remote_ram
+
+int drivers_refresh_remote_ram(void);
+#define refresh_remote_ram drivers_refresh_remote_ram
+#endif
+
 static inline bool is_access_hugepage(void)
 {
 	return access_page_size == PAGE_MODE_2M;

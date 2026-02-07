@@ -37,11 +37,20 @@ static inline int page_mapcount(struct page *page)
 #define NODES_MASK		((1UL << NODES_WIDTH) - 1)
 
 pte_t *drivers__pte_offset_map(pmd_t *pmd, unsigned long addr, pmd_t *pmdvalp_);
+
+struct vm_area_struct;
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int page_to_nid(const struct page *page);
+struct page *pfn_to_online_page(unsigned long pfn);
+bool pfn_valid(unsigned long pfn);
+unsigned long page_to_pfn(struct page *page);
+bool __folio_test_movable(struct folio *folio);
+void folio_put(struct folio *folio);
+bool PageAnon(struct page *page);
+struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr);
 
 #ifdef __cplusplus
 }
@@ -59,12 +68,46 @@ static inline struct zone *page_zone(const struct page *page)
 
 static inline unsigned int compound_order(struct page *page)
 {
+	if (!page) {
+		return 0;
+	}
 	return page[1].compound_order;
 }
 
 static inline unsigned long page_size(struct page *page)
 {
+	if (!page) {
+		return PAGE_SIZE;
+	}
 	return PAGE_SIZE << compound_order(page);
+}
+
+static inline unsigned long folio_pfn(struct folio *folio)
+{
+	(void)folio;
+	return 0;
+}
+
+static inline unsigned long folio_size(struct folio *folio)
+{
+	(void)folio;
+	return PAGE_SIZE;
+}
+
+static inline int folio_isolate_lru(struct folio *folio)
+{
+	(void)folio;
+	return 0;
+}
+
+static inline void folio_clear_lru(struct folio *folio)
+{
+	(void)folio;
+}
+
+static inline void folio_putback_lru(struct folio *folio)
+{
+	(void)folio;
 }
 
 static inline pg_data_t *page_pgdat(const struct page *page)
@@ -96,6 +139,8 @@ static inline spinlock_t *pmd_lock(struct mm_struct *mm, pmd_t *pmd)
     spin_unlock(ptl); \
 } while (0)
 
+struct vma_iterator;
+
 #if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
 static inline spinlock_t *pte_lockptr(struct mm_struct *mm, pmd_t *pmd)
 {
@@ -115,43 +160,42 @@ static inline struct vm_area_struct *vma_next(struct vma_iterator *vmi)
 {
 	return NULL;
 }
-static inline bool folio_test_large(struct folio *folio)
-{
-    return false;
-}
-static inline unsigned int folio_order(struct folio *folio)
-{
-	if (!folio_test_large(folio))
-		return 0;
-	return folio->_flags_1 & 0xff;
-}
-
-static inline size_t folio_size(struct folio *folio)
-{
-    return PAGE_SIZE << folio_order(folio);
-}
 
 static inline int folio_nid(const struct folio *folio)
 {
     return page_to_nid(&folio->page);
 }
 
-static inline unsigned long folio_pfn(struct folio *folio)
+static inline struct folio *pfn_folio(unsigned long pfn)
 {
-    return 0;
+	static struct folio stub_folio;
+	return pfn ? &stub_folio : NULL;
+}
+
+#else
+static inline struct vm_area_struct *vma_find(struct vma_iterator *vmi, unsigned long max)
+{
+	(void)vmi;
+	(void)max;
+	return NULL;
+}
+
+static inline struct vm_area_struct *vma_next(struct vma_iterator *vmi)
+{
+	(void)vmi;
+	return NULL;
+}
+
+static inline int folio_nid(const struct folio *folio)
+{
+	return page_to_nid(&folio->page);
 }
 
 static inline struct folio *pfn_folio(unsigned long pfn)
 {
-    struct folio *stubFolio;
-    if (!pfn) {
-        return NULL;
-    }
-    stubFolio = (struct folio*)malloc(sizeof(*stubFolio));
-    return stubFolio;
+	static struct folio stub_folio;
+	return pfn ? &stub_folio : NULL;
 }
-
-#else /* KERNEL_VERSION(5, 10, 0) */
 #endif /* LINUX_VERSION_CODE */
 
 

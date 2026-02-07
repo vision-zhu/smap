@@ -38,6 +38,7 @@ struct hstate {
 
 typedef bool filter_hugetlb_t(struct folio *folio);
 extern int PageHuge(struct page *page);
+extern int PageHead(struct page *page);
 extern spinlock_t hugetlb_lock;
 
 #ifndef HUGE_MAX_HSTATE

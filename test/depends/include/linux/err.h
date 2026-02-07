@@ -26,9 +26,13 @@ extern "C" {
 
 #define __must_check
 
+/* Provide function symbols so UT can MOCKER() them */
+bool IS_ERR(const void *ptr);
+long PTR_ERR(const void *ptr);
+
 static inline int __must_check PTR_ERR_OR_ZERO(__force const void *ptr)
 {
-	return 0;
+	return IS_ERR(ptr) ? (int)PTR_ERR(ptr) : 0;
 }
 
 static inline void * __must_check ERR_PTR(long error)
