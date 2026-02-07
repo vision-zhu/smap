@@ -4,6 +4,7 @@
 
 #include <linux/fs.h>
 #include <linux/spinlock.h>
+#include <stdbool.h>
 
 struct fdtable {
 	unsigned int max_fds;
@@ -24,6 +25,9 @@ extern "C" {
 #endif
 
 struct fdtable *files_fdtable(struct files_struct *files);
+
+struct file *files_lookup_fd_rcu(struct files_struct *files, unsigned int fd);
+bool get_file_rcu(struct file *filp);
 
 #ifdef __cplusplus
 }
