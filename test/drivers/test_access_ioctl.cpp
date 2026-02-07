@@ -393,11 +393,17 @@ TEST_F(AccessIoctlTestKernel, IoctlRemovePid)
 TEST_F(AccessIoctlTestKernel, IoctlRemovePidTwo)
 {
     struct access_remove_pid_msg msg;
+    struct access_remove_pid_payload payload[1] = { 0 };
+    payload[0].pid = 1;
     msg.count = 1;
-    msg.payload[0].pid = 1;
+    msg.payload = payload;
     MOCKER(copy_from_user)
         .stubs()
         .with(outBoundP((void*)&msg, sizeof(msg)))
+        .will(returnValue(0UL));
+    MOCKER(copy_from_user)
+        .stubs()
+        .with(outBoundP((void*)payload, sizeof(payload)))
         .will(returnValue(0UL));
     MOCKER(access_remove_pid).stubs();
     MOCKER(access_remove_ham_pid).stubs();
