@@ -11,17 +11,13 @@
 
 #define LOOKUP_DIRECTORY 0x0002
 
-static inline int kern_path(const char *name, unsigned int flags, struct path *path)
-{
-	(void)name;
-	(void)flags;
-	(void)path;
-	return -ENOENT;
+#ifdef __cplusplus
+extern "C" {
+#endif
+int kern_path(const char *name, unsigned int flags, struct path *path);
+void path_put(const struct path *path);
+#ifdef __cplusplus
 }
-
-static inline void path_put(const struct path *path)
-{
-	(void)path;
-}
+#endif
 
 #endif
