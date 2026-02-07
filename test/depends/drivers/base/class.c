@@ -9,8 +9,22 @@
  */
 
 #include <linux/device/class.h>
+#include <linux/err.h>
+#include <linux/errno.h>
 
-void class_destroy(struct class_stub *cls)
+struct class *class_create_stub(void *owner, const char *name)
 {
+	(void)owner;
+	static struct class cls;
+
+	if (!name) {
+		return (struct class *)ERR_PTR(-EINVAL);
+	}
+	return &cls;
+}
+
+void class_destroy(struct class *cls)
+{
+	(void)cls;
 
 }

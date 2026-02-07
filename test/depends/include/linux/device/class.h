@@ -4,23 +4,24 @@
 #define _DEVICE_CLASS_DEPENDS_H_
 
 #include <linux/kobject.h>
-#include <linux/version.h>
 
-struct class_stub {
+struct class {
 };
-
-#if LINUX_VERSION_CODE == KERNEL_VERSION(6, 6, 0)
-#define class_create(name) ((name) ? 1 : 0)
-#else
-#define class_create(owner, name) (((owner) && (name)) ? 1 : 0)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-void class_destroy(struct class_stub *cls);
+struct class *class_create_stub(void *owner, const char *name);
+void class_destroy(struct class *cls);
 #ifdef __cplusplus
 }
 #endif
+
+/* Support both historical and newer kernel call sites. */
+#define __class_create_1(name) class_create_stub(NULL, (name))
+#define __class_create_2(owner, name) class_create_stub((void *)(owner), (name))
+#define __CLASS_CREATE_GET(_1, _2, NAME, ...) NAME
+#define class_create(...) \
+	__CLASS_CREATE_GET(__VA_ARGS__, __class_create_2, __class_create_1)(__VA_ARGS__)
 
 #endif
