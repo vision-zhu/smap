@@ -8,6 +8,8 @@
 #define __TRACKING_BUS_H__
 
 #include <linux/device.h>
+#include <linux/device/driver.h>
+#include <linux/module.h>
 
 #define MAX_NODE_NUM 32
 
