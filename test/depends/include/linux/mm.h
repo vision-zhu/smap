@@ -65,11 +65,17 @@ static inline struct zone *page_zone(const struct page *page)
 
 static inline unsigned int compound_order(struct page *page)
 {
+	if (!page) {
+		return 0;
+	}
 	return page[1].compound_order;
 }
 
 static inline unsigned long page_size(struct page *page)
 {
+	if (!page) {
+		return PAGE_SIZE;
+	}
 	return PAGE_SIZE << compound_order(page);
 }
 

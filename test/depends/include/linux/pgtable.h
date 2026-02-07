@@ -6,10 +6,12 @@
 #include <asm/pgtable-types.h>
 #include <stdbool.h>
 
+struct page;
+
 #define pte_unmap(pte) ((void)(pte))
 #define __pte_map(pmd, address) NULL
 #define pte_cont(pte)   NULL
-#define pte_page(pte)    (pte_pfn(pte))
+#define pte_page(pte)    ((struct page *)0)
 #define pte_dirty(pte)    NULL
  
 static inline int pmd_same(pmd_t pmd_a, pmd_t pmd_b)
