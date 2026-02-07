@@ -61,7 +61,7 @@ TEST_F(AccessIoctlTest, TestAccessIoctlRemovePid)
 TEST_F(AccessIoctlTest, TestAccessIoctlRemoveAllPid)
 {
     int ret;
-    MOCKER((int (*)(const char *, int, ...))open).stubs().will(returnValue(-EPERM));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(-EPERM));
     ret = AccessIoctlRemoveAllPid();
     EXPECT_EQ(-EBADF, ret);
 }
@@ -70,7 +70,7 @@ TEST_F(AccessIoctlTest, TestAccessIoctlWalkPagemap)
 {
     int ret;
     size_t len;
-    MOCKER((int (*)(const char *, int, ...))open).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(0));
     MOCKER((int (*)(int, unsigned long, void *))ioctl).stubs().will(returnValue(-1));
     ret = AccessIoctlWalkPagemap(&len);
     EXPECT_EQ(-EBADF, ret);
@@ -82,7 +82,7 @@ TEST_F(AccessIoctlTest, TestAccessRead)
     int ret;
     size_t len = 1;
     char buf[BUFFER_SIZE];
-    MOCKER((int (*)(const char *, int, ...))open).stubs().will(returnValue(1));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(1));
     MOCKER((long (*)(int, void *, unsigned long))read).stubs().will(returnValue(0));
     MOCKER((int (*)(int))close).stubs().will(ignoreReturnValue());
     ret = AccessRead(len, buf);

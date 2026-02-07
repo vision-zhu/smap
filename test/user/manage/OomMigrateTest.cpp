@@ -449,7 +449,7 @@ TEST_F(OomMigrateTest, TestOpenPidPagemapFileSecond)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER((int (*)(const char *, int, ...))open).stubs().will(returnValue(-1));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(-1));
     ret = OpenPidPagemapFile(pid, &pagemapFd);
     EXPECT_EQ(-ENODEV, ret);
 }
@@ -462,7 +462,7 @@ TEST_F(OomMigrateTest, TestOpenPidPagemapFileThird)
     MOCKER((int (*)(char *, unsigned long, unsigned long, char const *, void *))snprintf_s)
         .stubs()
         .will(returnValue(0));
-    MOCKER((int (*)(const char *, int, ...))open).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))open).stubs().will(returnValue(0));
     ret = OpenPidPagemapFile(pid, &pagemapFd);
     EXPECT_EQ(0, ret);
 }
