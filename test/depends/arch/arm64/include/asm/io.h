@@ -12,7 +12,10 @@
 
 #define readl(c) (c)
 #define writel(v, c) (c)
-#define iounmap(addr) (addr)
-#define ioremap(addr, size) (addr)
+#define iounmap(addr)                 \
+	do {                          \
+		(void)(addr);         \
+	} while (0)
+#define ioremap(addr, size) ((void *)(unsigned long)(addr))
 
 #endif	/* __ASM_IO_H */

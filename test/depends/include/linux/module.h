@@ -21,6 +21,7 @@
 #define MODULE_LICENSE(_license)
 #define MODULE_AUTHOR(_author)
 #define MODULE_DESCRIPTION(_description)
+#define MODULE_DEVICE_TABLE(type, name)
 
 #define __init
 #define __exit
