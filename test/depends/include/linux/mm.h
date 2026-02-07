@@ -71,6 +71,34 @@ static inline unsigned long page_size(struct page *page)
 	return PAGE_SIZE << compound_order(page);
 }
 
+static inline unsigned long folio_pfn(struct folio *folio)
+{
+	(void)folio;
+	return 0;
+}
+
+static inline unsigned long folio_size(struct folio *folio)
+{
+	(void)folio;
+	return PAGE_SIZE;
+}
+
+static inline int folio_isolate_lru(struct folio *folio)
+{
+	(void)folio;
+	return 0;
+}
+
+static inline void folio_clear_lru(struct folio *folio)
+{
+	(void)folio;
+}
+
+static inline void folio_putback_lru(struct folio *folio)
+{
+	(void)folio;
+}
+
 static inline pg_data_t *page_pgdat(const struct page *page)
 {
 	struct pglist_data *p = NULL;
