@@ -5,14 +5,19 @@
 
 #include <linux/kobject.h>
 
-struct class {
+/*
+ * DT build compiles C sources after running test/run_dt.sh which rewrites
+ * identifiers like `class` -> `class_stub` in *.c files. Keep the type name
+ * C++-safe (since `class` is a C++ keyword) while matching rewritten sources.
+ */
+struct class_stub {
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-struct class *class_create_stub(void *owner, const char *name);
-void class_destroy(struct class *cls);
+struct class_stub *class_create_stub(void *owner, const char *name);
+void class_destroy(struct class_stub *cls);
 #ifdef __cplusplus
 }
 #endif

@@ -12,18 +12,18 @@
 #include <linux/err.h>
 #include <linux/errno.h>
 
-struct class *class_create_stub(void *owner, const char *name)
+struct class_stub *class_create_stub(void *owner, const char *name)
 {
 	(void)owner;
-	static struct class cls;
+	static struct class_stub cls;
 
 	if (!name) {
-		return (struct class *)ERR_PTR(-EINVAL);
+		return (struct class_stub *)ERR_PTR(-EINVAL);
 	}
 	return &cls;
 }
 
-void class_destroy(struct class *cls)
+void class_destroy(struct class_stub *cls)
 {
 	(void)cls;
 
