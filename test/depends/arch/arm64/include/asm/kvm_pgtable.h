@@ -146,10 +146,16 @@ static inline kvm_pte_t *kvm_dereference_pteref(struct kvm_pgtable_walker *walke
 
 typedef u64 kvm_pte_t;
 
+typedef kvm_pte_t *kvm_pteref_t;
+struct kvm_pgtable_mm_ops;
+struct kvm_pgtable_visit_ctx;
+
+#define KVM_PGTABLE_MAX_LEVELS 4U
+
 struct kvm_pgtable {
 	u32 ia_bits;
 	u32 start_level;
-	kvm_pte_t *pgd;
+	kvm_pteref_t pgd;
 
 	/* Stage-2 only */
 	struct kvm_s2_mmu *mmu;
@@ -169,6 +175,44 @@ struct kvm_pgtable_walker {
 	void *const arg;
 	const enum kvm_pgtable_walk_flags flags;
 };
+
+struct kvm_pgtable_mm_ops {
+	void* (*zalloc_page)(void *arg);
+	void* (*zalloc_pages_exact)(size_t size);
+	void (*free_pages_exact)(void *addr, size_t size);
+	void (*free_unlinked_table)(void *addr, u32 level);
+	int (*page_count)(void *addr);
+	void (*put_page)(void *addr);
+	void (*get_page)(void *addr);
+	void* (*phys_to_virt)(phys_addr_t phys);
+	phys_addr_t (*virt_to_phys)(void *addr);
+	void (*icache_inval_pou)(void *addr, size_t size);
+	void (*dcache_clean_inval_poc)(void *addr, size_t size);
+};
+
+struct kvm_pgtable_visit_ctx {
+	kvm_pte_t *ptep;
+	kvm_pte_t old;
+	void *arg;
+	struct kvm_pgtable_mm_ops *mm_ops;
+	u64 start;
+	u64 addr;
+	u64 end;
+	u32 level;
+	enum kvm_pgtable_walk_flags flags;
+};
+
+static inline bool kvm_pgtable_walk_shared(const struct kvm_pgtable_visit_ctx *ctx)
+{
+	(void)ctx;
+	return false;
+}
+
+static inline kvm_pte_t *kvm_dereference_pteref(struct kvm_pgtable_walker *walker, kvm_pteref_t pteref)
+{
+	(void)walker;
+	return pteref;
+}
 
 #endif /* KERNEL_VERSION(6, 6, 0) */
 #endif /* __ARM64_KVM_PGTABLE_H__ */
