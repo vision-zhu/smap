@@ -21,8 +21,13 @@
 #define LOCAL_NUMA_SHIFT 0
 #define REMOTE_NUMA_SHIFT (LOCAL_NUMA_SHIFT + LOCAL_NUMA_BITS)
 
-#define LOCAL_NUMA_MASK ((~(1UL << LOCAL_NUMA_BITS)) << LOCAL_NUMA_SHIFT)
-#define REMOTE_NUMA_MASK ((~(1UL << REMOTE_NUMA_BITS)) << REMOTE_NUMA_SHIFT)
+/*
+ * numa bitmap layout (uint32_t):
+ * - L1(local)  uses bits [LOCAL_NUMA_SHIFT, LOCAL_NUMA_SHIFT + LOCAL_NUMA_BITS)
+ * - L2(remote) uses bits [REMOTE_NUMA_SHIFT, REMOTE_NUMA_SHIFT + REMOTE_NUMA_BITS)
+ */
+#define LOCAL_NUMA_MASK (((1U << LOCAL_NUMA_BITS) - 1U) << LOCAL_NUMA_SHIFT)
+#define REMOTE_NUMA_MASK (((1U << REMOTE_NUMA_BITS) - 1U) << REMOTE_NUMA_SHIFT)
 
 #define BITS_PER_LONG 64
 
@@ -45,12 +50,12 @@ static inline void ClearL1(uint32_t *nodes)
 static inline void SetL1(uint32_t *nodes, int nid)
 {
     ClearL1(nodes);
-    *nodes |= (1 << nid);
+    *nodes |= (1U << nid);
 }
 
 static inline void AddL1(uint32_t *nodes, int nid)
 {
-    *nodes |= (1 << nid);
+    *nodes |= (1U << nid);
 }
 
 static inline bool EqualToL1(uint32_t nodes, int nid)
@@ -86,12 +91,12 @@ static inline void ClearL2(uint32_t *nodes)
 static inline void SetL2(uint32_t *nodes, int pos)
 {
     ClearL2(nodes);
-    *nodes |= (1 << pos);
+    *nodes |= (1U << pos);
 }
 
 static inline void AddL2(uint32_t *nodes, int pos)
 {
-    *nodes |= (1 << pos);
+    *nodes |= (1U << pos);
 }
 
 static inline bool EqualToL2(uint32_t nodes, int pos)

@@ -684,7 +684,56 @@ TEST_F(ManageTest, TestQueryManagedProcess)
     g_processManager.processes = &mockProcess;
     ret = QueryManagedProcess(PROCESS_TYPE);
     EXPECT_NE(ret, static_cast<pid_t *>(nullptr));
+    EXPECT_EQ(123, ret[0]);
+    EXPECT_EQ(PROCESS_TYPE, mockProcess.type);
     free(ret);
+}
+
+TEST_F(ManageTest, TestQueryManagedProcessShouldNotMutateOtherType)
+{
+    pid_t *ret;
+    ProcessAttr vm = {};
+    ProcessAttr proc = {};
+    proc.pid = 111;
+    proc.type = PROCESS_TYPE;
+    vm.pid = 222;
+    vm.type = VM_TYPE;
+    proc.next = &vm;
+    vm.next = nullptr;
+
+    g_processManager.processes = &proc;
+    /*
+     * Intentionally over-estimate nr[PROCESS_TYPE] to ensure the returned array
+     * has enough capacity even if a bug wrongly treats other types as matched.
+     */
+    g_processManager.nr[PROCESS_TYPE] = 2;
+    ret = QueryManagedProcess(PROCESS_TYPE);
+    EXPECT_NE(ret, static_cast<pid_t *>(nullptr));
+    EXPECT_EQ(VM_TYPE, vm.type);
+    free(ret);
+
+    g_processManager.processes = nullptr;
+    g_processManager.nr[PROCESS_TYPE] = 0;
+}
+
+TEST_F(ManageTest, TestNumaNodesBitmapSetL1PreservesL2)
+{
+    uint32_t nodes = 0;
+    SetL2(&nodes, LOCAL_NUMA_BITS); // first L2 bit position
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS));
+    SetL1(&nodes, 1);
+    EXPECT_TRUE(InL1(nodes, 1));
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS));
+}
+
+TEST_F(ManageTest, TestNumaNodesBitmapSetL2PreservesL1)
+{
+    uint32_t nodes = 0;
+    AddL1(&nodes, 0);
+    EXPECT_TRUE(InL1(nodes, 0));
+    SetL2(&nodes, LOCAL_NUMA_BITS + 2);
+    EXPECT_TRUE(InL2(nodes, LOCAL_NUMA_BITS + 2));
+    EXPECT_TRUE(InL1(nodes, 0));
 }
 
 extern "C" int DestroyProcessManager();

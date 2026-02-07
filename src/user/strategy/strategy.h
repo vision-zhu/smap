@@ -39,7 +39,7 @@ static inline uint32_t NrLocalPage(ProcessAttr *process)
 static inline uint32_t NrRemotePage(ProcessAttr *process)
 {
     uint32_t pages = 0;
-    for (int n = LOCAL_NUMA_NUM; n < MAX_NODES; n++) {
+    for (int n = GetNrLocalNuma(); n < MAX_NODES; n++) {
         if (NotInAttrL2(process, n)) {
             continue;
         }

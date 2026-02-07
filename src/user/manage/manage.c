@@ -71,6 +71,7 @@ static int RemoteNumaInfoInit(void)
             g_processManager.remoteNumaInfo.privateUsedInfo[i][j].size = 0;
         }
     }
+    return 0;
 }
 
 int GetNrLocalNuma(void)
@@ -565,6 +566,9 @@ static void SetProcessConfig(ProcessAttr *attr, ProcessParam *param)
                              attr->migrateParam[i].memSize);
             
             for (int j = 0; j < nrLocalNuma && j < LOCAL_NUMA_NUM; j++) {
+                if (NotInAttrL1(attr, j)) {
+                    continue;
+                }
                 attr->strategyAttr.initRemoteMemRatio[j][param->numaParam[i].nid - nrLocalNuma] =
                     param->numaParam[i].ratio;
                 SMAP_LOGGER_INFO("Multinuma vm destNid: %d, ratio: %lu", param->numaParam[i].nid,
@@ -947,7 +951,7 @@ pid_t *QueryManagedProcess(PidType type)
     }
     int nrManaged = 0;
     while (current) {
-        if (current->type = type) {
+        if (current->type == type) {
             managedPid[nrManaged++] = current->pid;
         }
         current = current->next;
