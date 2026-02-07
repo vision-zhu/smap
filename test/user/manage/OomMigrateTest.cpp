@@ -417,7 +417,7 @@ TEST_F(OomMigrateTest, TestGetPaddrFromMemRangeThird)
     struct MigList mList;
     mList.nr = 0;
     uint64_t pageCount = 10;
-    MOCKER(lseek).stubs().will(returnValue(0));
+    MOCKER((off_t (*)(int, off_t, int))lseek).stubs().will(returnValue(0));
     MOCKER((long (*)(int, void *, unsigned long))read).stubs().will(returnValue(PAGEMAP_ENTRY_SIZE));
     MOCKER(OomGetPaddr).stubs().will(ignoreReturnValue());
 
