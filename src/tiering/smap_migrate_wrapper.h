@@ -123,13 +123,15 @@ struct obmm_ext_addr {
 	u64 pa;
 };
 
-struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid,
-					bool is_mig_back);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long get_pfnblock_flags_mask(const struct page *page, unsigned long pfn, unsigned long mask);
+
+struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid,
+					bool is_mig_back);
+unsigned long get_pfnblock_flags_mask(const struct page *page, unsigned long pfn,
+				      unsigned long mask);
+
 #ifdef __cplusplus
 }
 #endif

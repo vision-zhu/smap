@@ -54,10 +54,6 @@ TEST_F(SmapMigrateWrapperTest, PfnToBitidx)
 extern "C" struct folio *dequeue_huge_page_nodemask(struct hstate *h, gfp_t gfp_mask,
 	int nid, nodemask_t *nmask);
 
-extern "C" struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid,
-						   bool is_mig_back);
-
-
 TEST_F(SmapMigrateWrapperTest, SmapAllocHugePageNode)
 {
     struct folio *new_folio = NULL;

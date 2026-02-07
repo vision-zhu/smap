@@ -27,8 +27,6 @@ protected:
     }
 };
 
-extern "C" struct folio *smap_alloc_huge_page_node(struct folio *folio, int nid,
-						   bool is_mig_back);
 TEST_F(MigrateWrapperTest, Hugepage)
 {
     struct folio *new_folio = NULL;
