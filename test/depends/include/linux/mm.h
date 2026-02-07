@@ -46,6 +46,8 @@ struct page *pfn_to_online_page(unsigned long pfn);
 bool pfn_valid(unsigned long pfn);
 unsigned long page_to_pfn(struct page *page);
 bool __folio_test_movable(struct folio *folio);
+void folio_put(struct folio *folio);
+bool PageAnon(struct page *page);
 
 #ifdef __cplusplus
 }
