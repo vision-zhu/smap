@@ -148,12 +148,12 @@ TEST_F(SmapConfigTest, TestDoesConfigExist)
 {
     bool ret;
 
-    MOCKER(access).stubs().will(returnValue(NORMAL_ERR));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(NORMAL_ERR));
     ret = DoesConfigExist();
     EXPECT_FALSE(ret);
 
     GlobalMockObject::verify();
-    MOCKER(access).stubs().will(returnValue(0));
+    MOCKER((int (*)(const char *, int))access).stubs().will(returnValue(0));
     ret = DoesConfigExist();
     EXPECT_TRUE(ret);
 }
@@ -163,13 +163,13 @@ TEST_F(SmapConfigTest, TestRemoveConfig)
 {
     int ret;
 
-    MOCKER(unlink).stubs().will(returnValue(NORMAL_ERR));
+    MOCKER((int (*)(const char *))unlink).stubs().will(returnValue(NORMAL_ERR));
     errno = EINVAL;
     ret = RemoveConfig();
     EXPECT_EQ(-EINVAL, ret);
 
     GlobalMockObject::verify();
-    MOCKER(unlink).stubs().will(returnValue(NORMAL_ERR));
+    MOCKER((int (*)(const char *))unlink).stubs().will(returnValue(NORMAL_ERR));
     errno = ENOENT;
     ret = RemoveConfig();
     EXPECT_EQ(0, ret);
