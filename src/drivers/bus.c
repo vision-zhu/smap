@@ -64,9 +64,9 @@ static void tracking_bus_remove(struct device *dev)
 static struct bus_type tracking_bus_type = {
 	.name = "tracking",
 	.uevent = NULL,
-	.match = tracking_bus_match,
-	.probe = tracking_bus_probe,
-	.remove = tracking_bus_remove,
+	.match = (int (*)(struct device *, struct device_driver *))tracking_bus_match,
+	.probe = (int (*)(struct device *))tracking_bus_probe,
+	.remove = (void (*)(struct device *))tracking_bus_remove,
 };
 
 int inner_tracking_driver_register(struct tracking_driver *tracking_drv,
