@@ -16,6 +16,7 @@
 #include <linux/minmax.h>
 #include <linux/sort.h>
 #include <linux/completion.h>
+#include <linux/string.h>
 
 #include "ub_hist.h"
 #include "smap_hist_mid.h"
