@@ -272,8 +272,9 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemap)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
+    static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
@@ -320,8 +321,9 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapThird)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
+    static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
@@ -348,8 +350,9 @@ TEST_F(OomMigrateTest, TestGetPaddrsFromPagemapForth)
         .stubs()
         .will(returnValue(0));
     static FILE fake_file;
+    static char fake_line[] = "1";
     MOCKER((FILE *(*)(const char *, const char *))fopen).stubs().will(returnValue(&fake_file));
-    MOCKER(fgets).stubs().will(returnValue(static_cast<char *>("1"))).then(returnValue((static_cast<char *>(nullptr))));
+    MOCKER(fgets).stubs().will(returnValue(fake_line)).then(returnValue((static_cast<char *>(nullptr))));
     MOCKER((int (*)(char *, char const *, unsigned long *, unsigned long *))sscanf_s)
         .stubs()
         .will(returnValue(MAPS_LIN_LEN));
