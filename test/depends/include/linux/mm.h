@@ -44,6 +44,8 @@ extern "C" {
 int page_to_nid(const struct page *page);
 struct page *pfn_to_online_page(unsigned long pfn);
 bool pfn_valid(unsigned long pfn);
+unsigned long page_to_pfn(struct page *page);
+bool __folio_test_movable(struct folio *folio);
 
 #ifdef __cplusplus
 }

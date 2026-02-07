@@ -10,6 +10,7 @@
 #include <linux/kthread.h>
 #include <linux/ktime.h>
 #include <linux/gfp.h>
+#include <linux/vmalloc.h>
 #include <linux/cpumask.h>
 #include <linux/page-isolation.h>
 #include <linux/limits.h>

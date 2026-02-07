@@ -31,6 +31,16 @@ static inline int PageTransHuge(struct page *page)
 	return 0;
 }
 
+static inline int PageHuge(struct page *page)
+{
+	return 0;
+}
+
+static inline int PageHead(struct page *page)
+{
+	return 0;
+}
+
 static inline bool folio_test_hugetlb(struct folio *folio)
 {
     return false;
