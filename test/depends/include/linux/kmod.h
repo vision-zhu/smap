@@ -13,4 +13,13 @@
 
 #define KMOD_PATH_LEN 256
 
+static inline int call_usermodehelper(char *path, char **argv, char **envp, int wait)
+{
+    (void)path;
+    (void)argv;
+    (void)envp;
+    (void)wait;
+    return 0;
+}
+
 #endif /* __LINUX_KMOD_H__ */

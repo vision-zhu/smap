@@ -11,6 +11,7 @@
 #include <linux/rwsem.h>
 #include <linux/sysfs.h>
 #include <linux/err.h>
+#include <linux/export.h>
 #include <stdlib.h>
 #include <linux/kdev_t.h>
 #include <linux/uaccess.h>
@@ -69,6 +70,20 @@ static inline unsigned iminor(const struct inode *inode)
 typedef void *fl_owner_t;
 
 #define fput(x)
+
+static inline struct file *filp_open(const char *filename, int flags, umode_t mode)
+{
+    (void)filename;
+    (void)flags;
+    (void)mode;
+    return ERR_PTR(-ENOENT);
+}
+
+static inline void filp_close(struct file *filp, fl_owner_t id)
+{
+    (void)filp;
+    (void)id;
+}
 
 #ifdef __cplusplus
 extern "C" {
