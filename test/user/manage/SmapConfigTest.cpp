@@ -350,7 +350,8 @@ TEST_F(SmapConfigTest, TestIsConfigHeaderValid)
     bool ret;
     size_t numaConfigLen = 20;
     size_t minLen = CONFIG_HEADER_LEN + numaConfigLen;
-    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN, .totalLen = minLen };
+    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN,
+                                       .totalLen = static_cast<uint32_t>(minLen) };
 
     MOCKER(CalcNumaConfigLen).stubs().will(returnValue(numaConfigLen));
     ret = IsConfigHeaderValid(&header);
@@ -610,7 +611,7 @@ TEST_F(SmapConfigTest, TestRecoverProcessConfig)
     int ret;
     int nrProcess = 2;
     ProcessAttr *attr;
-    struct PayloadHeader header = { .len = nrProcess * CONFIG_PROC_LEN };
+    struct PayloadHeader header = { .len = static_cast<uint32_t>(nrProcess * CONFIG_PROC_LEN) };
     struct ProcessManager manager = { .processes = nullptr };
     struct ProcessPayload payload[] = {
         { 1025, 25, NORMAL_SCAN, VM_TYPE, { 1 }, { 5 }, 200 },
@@ -637,7 +638,7 @@ TEST_F(SmapConfigTest, TestRecoverProcessConfigTwo)
 {
     int ret;
     int nrProcess = 1;
-    struct PayloadHeader header = { .len = nrProcess * CONFIG_PROC_LEN };
+    struct PayloadHeader header = { .len = static_cast<uint32_t>(nrProcess * CONFIG_PROC_LEN) };
     struct ProcessManager manager = { .processes = nullptr };
     struct ProcessPayload payload[] = {
         { 1025, 25, NORMAL_SCAN, VM_TYPE, { 1 }, { 5 }, 200 },
@@ -828,7 +829,8 @@ TEST_F(SmapConfigTest, TestChangeProcessConfigExtendFile)
     int fd;
     size_t oldLen = 30;
     size_t newLen = 48;
-    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN, .totalLen = oldLen };
+    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN,
+                                       .totalLen = static_cast<uint32_t>(oldLen) };
 
     MOCKER(ParseHeader).stubs().with(mockcpp::any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
     MOCKER(BuildAllProcessPayload).stubs().will(returnValue(0));
@@ -845,7 +847,8 @@ TEST_F(SmapConfigTest, TestChangeProcessConfigShrinkFile)
     int fd;
     size_t oldLen = 30;
     size_t newLen = 20;
-    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN, .totalLen = oldLen };
+    struct SmapConfigHeader header = { .ver = SMAP_CONFIG_VER, .headerLen = CONFIG_HEADER_LEN,
+                                       .totalLen = static_cast<uint32_t>(oldLen) };
 
     MOCKER(ParseHeader).stubs().with(mockcpp::any(), outBoundP(&header, sizeof(header))).will(returnValue(0));
     MOCKER(BuildAllProcessPayload).stubs().will(returnValue(0));
